@@ -1,0 +1,22 @@
+ul li {
+    font: 25px Helvetica, Arial;
+}
+
+#orange-container {
+    background-color: sandybrown;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    max-width: 30%;
+}
+
+#list {
+    position: relative;
+    top: 10%;
+}
+
+#pig {
+    position: relative;
+    bottom: -30%;
+}

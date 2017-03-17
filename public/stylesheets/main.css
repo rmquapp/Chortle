@@ -1,6 +1,7 @@
 html {
     width: 100%;
     height: 100%;
+    position: fixed;
 }
 
 .jumbotron {
@@ -47,13 +48,4 @@ html {
 .jumbotron .lang-logo img {
   max-width: 80%;
   margin-top: 40px;
-}
-
-ul li {
-    font: 25px Helvetica, Arial;
-}
-
-#orange-container {
-    background-color: sandybrown;
-    height: 100%;
 }
