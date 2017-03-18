@@ -5,19 +5,25 @@ html {
     overflow-x: hidden;
 }
 
+body {
+    height: 100%;
+}
+
 ul li {
-    font: 25px Helvetica, Arial;
+    font: 18px Helvetica, Arial;
+    padding: 10px;
+}
+
+#page {
+    position: absolute;
+    bottom: 0;
+    top: 73px;
 }
 
 #orange-container {
     background-color: sandybrown;
-    height: 100%;
     position: relative;
     right: 0;
     bottom: 0;
-}
-
-#list {
-    position: relative;
-    top: 40%;
+    height: 100%;
 }
