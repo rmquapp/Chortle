@@ -9,15 +9,15 @@ body {
     height: 100%;
 }
 
-ul li {
+#ad-list {
     font: 18px Helvetica, Arial;
-    padding: 10px;
+    padding: 30px;
 }
 
 #page {
     position: absolute;
     bottom: 0;
-    top: 73px;
+    top: 51px;
 }
 
 #orange-container {
