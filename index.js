@@ -34,6 +34,12 @@ app.get('/parent-registration', function(request, response) {
     response.render('pages/parent-registration');
 });
 
+
+/*
+    Server side REST API endpoints
+ */
+
+// Get the chores from the assigned_chore table associated to a parent
 app.get('/chores', function(request, response) {
 
     var choresJson = {};
@@ -67,37 +73,58 @@ app.get('/chores', function(request, response) {
         })
     });
 });
-// app.get('/assigned_chore', function (request, response) {
-//     var children = [];
-//     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-//         client.query('SELECT id FROM child WHERE p_id = 1', function (err, resultChildren) {
-//             done();
-//             if (err) {
-//                 console.error(err);
-//                 response.send("Error retrieving child " + err);
-//             }
-//             else {
-//                 for (var i = 0; i < resultChildren; i++) {
-//                     children.push(resultChildren[i]);
-//                 }
-//
-//                 if (children.length != 0) {
-//                     client.query('SELECT * FROM assigned_chore WHERE owner in (' + children.join(',') + ')', function (errChores, resultChores) {
-//                         done();
-//                         if (errChores) {
-//                             console.error(err);
-//                             response.send("Error " + errChores);
-//                         }
-//                         else {
-//                             response.send(resultChores);
-//                         }
-//
-//                     });
-//                 }
-//             }
-//         });
-//     });
-// });
+
+// Get the chore template associated to a parent
+app.get('/chore_template', function(request, response) {
+
+    var choresTemplateJson = [];
+
+    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+        client.query('SELECT ct.id , ct.name, ct.description, ct.value ' +
+            'FROM chore_template ct ' +
+            'WHERE ct.owner = 1', function (err, result) {
+            done();
+            if (err) {
+                console.error(err);
+            }
+            else {
+                for (var i = 0; i  < result.rows.length; i++) {
+                    var currentChore = result.rows[i];
+                    choresTemplateJson.push(
+                        {
+                            "id": currentChore["id"],
+                            "name": currentChore["name"],
+                            "description": currentChore["description"],
+                            "value": currentChore["value"]
+                        });
+                }
+                response.send({"chore_template": choresTemplateJson});
+            }
+        })
+    });
+});
+
+
+// Get the children from the child table
+app.get('/children', function(request, response) {
+    var children = [];
+    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+        client.query('SELECT ch.id , ch.name, ch.username ' +
+            'FROM child ch ' +
+            'WHERE ch.p_id = 1', function (err, result) {
+            done();
+            if (err) {
+                console.error(err);
+            }
+            else {
+                for (var i = 0; i  < result.rows.length; i++) {
+                    children.push(result.rows[i]);
+                }
+                response.send({"children": children});
+            }
+        })
+    });
+});
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
