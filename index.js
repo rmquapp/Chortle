@@ -33,6 +33,20 @@ app.get('/cool', function(request, response) {
   response.send(cool());
 });
 
+app.get('/chores', function(request, response) {
+    var children = [];
+    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+        client.query('SELECT id FROM child WHERE p_id= 1', function (err, resultChildren) {
+            done();
+            if (err) {
+                console.error(err);
+            }
+            else {
+                response.send("Testing");
+            }
+        })
+    });
+});
 // app.get('/assigned_chore', function (request, response) {
 //     var children = [];
 //     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
