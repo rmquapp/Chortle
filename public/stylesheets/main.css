@@ -39,3 +39,11 @@
   max-width: 80%;
   margin-top: 40px;
 }
+
+#sidebar-wrapper {
+  padding: 0;
+  margin: 0;
+  background-color: lightgray;
+  position: relative;
+  height: 100%;
+}

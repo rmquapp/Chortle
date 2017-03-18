@@ -33,6 +33,11 @@ app.get('/parent-registration', function(request, response) {
     response.render('pages/parent-registration');
 });
 
+// Child Registration Page
+app.get('/child-registration', function(request, response) {
+    response.render('pages/child-registration');
+});
+
 app.get('/chores', function(request, response) {
     var children = [];
     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
