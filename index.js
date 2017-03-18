@@ -1,4 +1,3 @@
-var cool = require('cool-ascii-faces');
 var express = require('express');
 var pg = require('pg');
 
@@ -30,8 +29,9 @@ app.get('/', function(request, response) {
   response.render('pages/index');
 });
 
-app.get('/cool', function(request, response) {
-  response.send(cool());
+// Parent Registration Page
+app.get('/parent-registration', function(request, response) {
+    response.render('pages/parent-registration');
 });
 
 app.get('/chores', function(request, response) {

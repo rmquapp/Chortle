@@ -1,0 +1,29 @@
+html {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    overflow-x: hidden;
+}
+
+body {
+    height: 100%;
+}
+
+#ad-list {
+    font: 18px Helvetica, Arial;
+    padding: 30px;
+}
+
+#page {
+    position: absolute;
+    bottom: 0;
+    top: 51px;
+}
+
+#orange-container {
+    background-color: sandybrown;
+    position: relative;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+}
