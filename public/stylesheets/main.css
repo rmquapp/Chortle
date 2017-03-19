@@ -1,28 +1,99 @@
-.jumbotron {
-  background: #3f4fc6;
-  color: white;
-  padding-bottom: 80px; }
-  .jumbotron .btn-primary {
-    background: #6e80d8;
-    border-color: #6e80d8; }
-    .jumbotron .btn-primary:hover {
-      background: #8190dd; }
-  .jumbotron p {
-    color: #d9ccee;
-    max-width: 75%;
-    margin: 1em auto 2em; }
-  .navbar + .jumbotron {
-    margin-top: -20px; }
-  .jumbotron .lang-logo {
-    display: block;
-    background: #4ba3cf;
-    border-radius: 50%;
-    overflow: hidden;
-    width: 200px;
-    height: 200px;
-    margin: auto;
-    border: 2px solid white; }
-    .jumbotron .lang-logo img {
-      max-width: 80%;
-      margin-top: 40px; }
+body {
+  overflow-y: hidden;
+}
 
+.navbar {
+    margin-bottom: 0;
+    background-color: #80BBA7;
+    border-width: 0;
+}
+
+.unassigned li {
+  margin-left: 35px;
+}
+
+#nav-title {
+  color: white;
+  font-family: 'Happy Monkey', cursive;
+  font-size: 1.4em;
+}
+
+.glyphicon {
+  color: white;
+}
+
+.glyphicon-plus {
+  color: #7A7A7A;
+}
+
+#add {
+    margin-left: 35px;
+    background-color: #D4D4D4;
+    display: block;
+    padding: 6px 15px;
+    margin-bottom: 20px;
+    font-weight: 400;
+    font-size: 13px;
+}
+
+#background {
+  background: #F2F2F2;
+  width: 23%;
+  min-height: 800px;
+  height: auto !important;
+  height: 800px;
+}
+
+#grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.inner {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+/**
+ * The dnd-list should always have a min-height,
+ * otherwise you can't drop to it once it's empty
+ */
+ul[dnd-list] {
+    min-height: 42px;
+    padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+ul[dnd-list] .dndDraggingSource {
+    display: none;
+}
+
+/**
+ * An element with .dndPlaceholder class will be
+ * added to the dnd-list while the user is dragging
+ * over it.
+ */
+ul[dnd-list] .dndPlaceholder {
+    background-color: #F2F2F2;
+    display: block;
+    min-height: 42px;
+}
+
+ul[dnd-list] li {
+    background-color: #fff;
+    box-shadow: 0 1px 7px -1px #DADADA;
+    display: block;
+    padding: 6px 15px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
