@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <% include ../partials/header.ejs %>
     <link rel="stylesheet" type="text/css" href="/stylesheets/registration.css"/>
+    <script src="child-registration.js"></script>
 </head>
 
-<body>
+<body ng-app="childrenApp">
 
 <% include ../partials/nav.ejs %>
 
@@ -22,17 +22,11 @@
             <h6></h6>
         </div>
         <div class="row inner">
-            <div class="three columns">
+            <div class="three columns" ng-controller="childCtrl">
                 <br>
-                <li id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd
-                    a chore
-                </li>
-                <ul dnd-list="models.lists.Unassigned" class="unassigned">
-                    <li ng-repeat="item in models.lists.Unassigned"
-                        dnd-draggable="item"
-                        dnd-moved="models.lists.Unassigned.splice($index, 1)"
-                        dnd-effect-allowed="move"
-                        class="unassigned">
+                <h5>Current Kids:</h5>
+                <ul dnd-list="models.lists.CurrKids" class="currKids">
+                    <li ng-repeat="item in models.lists.CurrKids">
                         {{item.name}}
                     </li>
                 </ul>
@@ -74,13 +68,13 @@
                     <br>
 
                     <div class="row">
-                    <div class="form-group col-md-6">
-                        <button type="Cancel" class="btn btn-primary" id="cancel">Cancel</button>
-                    </div>
+                        <div class="form-group col-md-6">
+                            <button type="Cancel" class="btn btn-primary" id="cancel">Cancel</button>
+                        </div>
 
-                    <div class="form-group col-md-6">
-                        <button type="Submit" class="btn btn-primary" id="submit">Submit</button>
-                    </div>
+                        <div class="form-group col-md-6">
+                            <button type="Submit" class="btn btn-primary" id="submit">Submit</button>
+                        </div>
                     </div>
 
                 </div>
