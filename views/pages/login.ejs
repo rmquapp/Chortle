@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link rel="icon" href="../../favicon.ico">
+    <title>Chortle Login</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/login.css"/>
+
+    <!-- Bootstrap core CSS -->
+    <% include ../partials/header.ejs %>
+    <script src="scripts/login.js"></script>
+</head>
+
+<body>
+<div class="content">
+    <div class="login-container">
+        <div class="login">
+            <h1 id="chortle-title">CHORTLE</h1>
+            <h2 id="chortle-description">Online, web-friendly, virtual piggy bank and chore board.</h2>
+            <form class="form-signin" id="login-form" method="post">
+                <h2 id="signin-heading">Please sign in</h2>
+                <label for="username" class="sr-only">Email address</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                    </label>
+                </div>
+                <button class="btn btn-lg btn-default btn-block" type="submit">Sign in</button>
+            </form>
+            <div id="register-link">Don't have an account? Create one <a class="link">here</a>.</div>
+        </div>
+        <div class="turtle">
+            <img src="images/side_turtle.png" alt="Chortle" class="img-responsive">
+        </div>
+    </div>
+</div>
+</body>
+</html>
