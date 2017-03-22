@@ -17,13 +17,13 @@ var Model = require('../model.js');
 router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
     // to the signin page.
+    console.log(process.env.DATABASE_URL);
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
         var user = req.user;
         res.render('pages/index');
-        console.log(process.env.DATABASE_URL);
-        console.log(env);
+
     }
 });
 
