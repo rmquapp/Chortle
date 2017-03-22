@@ -8,22 +8,10 @@
     <link rel="icon" href="../../favicon.ico">
     <title>Chortle Login</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/login.css"/>
+
     <!-- Bootstrap core CSS -->
     <% include ../partials/header.ejs %>
-
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
-
-
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <script src="scripts/login.js"></script>
 </head>
 
 <body>
@@ -32,12 +20,12 @@
         <div class="login">
             <h1 id="chortle-title">CHORTLE</h1>
             <h2 id="chortle-description">Online, web-friendly, virtual piggy bank and chore board.</h2>
-            <form class="form-signin">
+            <form class="form-signin" id="login-form" method="post">
                 <h2 id="signin-heading">Please sign in</h2>
-                <label for="inputEmail" class="sr-only">Email address</label>
-                <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-                <label for="inputPassword" class="sr-only">Password</label>
-                <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                <label for="username" class="sr-only">Email address</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" value="remember-me"> Remember me
