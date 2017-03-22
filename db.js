@@ -4,7 +4,7 @@ var knex = null;
 // Connect to local db or the heroku db
 if (env == 'development') {
     knex = require('knex')({
-        client: 'postgres',
+        client: 'pg',
         // Uncomment to enable SQL query logging in console.
         // debug   : true,
         connection: {
@@ -17,7 +17,7 @@ if (env == 'development') {
     });
 } else {
     knex = require('knex')({
-        client: 'postgresql',
+        client: 'pg',
         connection: {
             database: process.env.DATABASE_URL + '?ssl=true'
         },
