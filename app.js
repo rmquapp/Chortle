@@ -8,7 +8,6 @@ var express       = require('express'),
     bodyParser    = require('body-parser'),
     app           = express();
 
-
 app.set('port', (process.env.PORT || 5000));
 
 require('./passport.js')(passport);

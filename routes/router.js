@@ -22,6 +22,8 @@ router.get('/', function(req, res, next) {
     } else {
         var user = req.user;
         res.render('pages/index');
+        console.log(process.env.DATABASE_URL);
+        console.log(env);
     }
 });
 
