@@ -17,7 +17,6 @@ var Model = require('../model.js');
 router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
     // to the signin page.
-    console.log(process.env.DATABASE_URL);
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
