@@ -19,7 +19,7 @@ if (env == 'development') {
     knex = require('knex')({
         client: 'pg',
         connection: {
-            database: process.env.DATABASE_URL + '?ssl=true'
+            database: process.env.DATABASE_URL
         },
     });
 }
