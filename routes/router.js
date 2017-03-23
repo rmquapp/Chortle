@@ -70,26 +70,26 @@ router.get('/signup', function(req, res, next) {
 // Processing the page for user registration
 router.post('/signup', function(req, res, next) {
     // Here, req.body is { username, password }
-    var user = req.body;
+    var parent = req.body;
 
     // Before making the account, try and fetch a username to see if it already exists.
-    var usernamePromise = new Model.User({ username: user.username }).fetch();
+    var usernamePromise = new Model.Parent({ username: parent.username }).fetch();
 
     return usernamePromise.then(function(model) {
         if (model) {
             res.render('signup', { title: 'signup', errorMessage: 'username already exists' });
         } else {
-            var password = user.password;
+            var password = parent.password;
             var hash = bcrypt.hashSync(password);
 
             // Make a new postgres db row of the account
-            var signUpUser = new Model.User({
-                username: user.username,
+            var signUpParent = new Model.Parent({
+                username: parent.username,
                 password: hash,
-                email: user.email,
-                name: user.first + " " + user.last});
+                email: parent.email,
+                name: parent.first + " " + parent.last});
 
-            signUpUser.save({}, {method: 'insert'}).then(function(model) {
+            signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered uesr
                 res.redirect(307, '/signin');
             });
@@ -140,6 +140,61 @@ router.get('/chores', function(request, response) {
         })
     });
 });
+
+
+// Function to create chores
+router.post('/chores', function(req, res, next) {
+    if (!req.isAuthenticated()) {
+        res.redirect(307, '/');
+    }
+    else {
+        var jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
+
+        var choreToCreate = req.body;
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!choreToCreate.hasOwnProperty(jsonKeys[i])) {
+                return res.json({"error": "Missing parameter in assigned chore"});
+            }
+
+        }
+        // Check child assigned (owner) exists
+        Model.grabChildCredentials(choreToCreate['owner'], function (error, data) {
+            if (error) {
+                return res.json({"error": error});
+            }
+        });
+        // Check parent has child with id == owner
+        Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
+            if (error) {
+                return res.json({"error": error});
+            }
+            else {
+                if (!data.includes(parseInt(choreToCreate['owner']))) {
+                    return res.json({"error": "Child assigned to chore does not belong to parent"});
+                }
+            }
+        });
+
+
+        var assignedChore = new Model.AssignedChore({
+            owner       : choreToCreate.owner,
+            name        : choreToCreate.name,
+            description : choreToCreate.description,
+            value       : choreToCreate.value,
+            status      : choreToCreate.status
+        });
+
+        assignedChore.save({}, {method: 'insert'}).then(function(model) {
+
+            res.json({"message": "Chore created Successfully"});
+        });
+    }
+
+
+
+
+});
+
 
 // Get the chore template associated to a parent
 router.get('/chore_template', function(request, response) {
