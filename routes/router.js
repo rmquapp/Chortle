@@ -248,4 +248,9 @@ router.get('/children', function(request, response) {
     });
 });
 
+// Child Registration Page
+router.get('/child-registration', function(request, response) {
+  response.render('pages/child-registration');
+});
+
 module.exports = router;

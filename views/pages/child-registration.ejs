@@ -3,7 +3,7 @@
 <head>
     <% include ../partials/header.ejs %>
     <link rel="stylesheet" type="text/css" href="/stylesheets/registration.css"/>
-    <script src="child-registration.js"></script>
+    <script src="scripts/child-registration.js"></script>
 </head>
 
 <body ng-app="childrenApp">
@@ -25,8 +25,8 @@
             <div class="three columns" ng-controller="childCtrl">
                 <br>
                 <h5>Current Kids:</h5>
-                <ul dnd-list="models.lists.CurrKids" class="currKids">
-                    <li ng-repeat="item in models.lists.CurrKids">
+                <ul dnd-list="models.list" class="currKids">
+                    <li ng-repeat="item in models.list">
                         {{item.name}}
                     </li>
                 </ul>
