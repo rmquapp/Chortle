@@ -1,0 +1,22 @@
+.parent-view-container{
+    display:flex;
+    width: 100%;
+    height: 100%;
+    flex-direction:row;
+    flex-wrap: wrap;
+}
+.chore-list{
+    width:100%;
+    padding: 10px;
+}
+
+.kids-lists{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+.kid-list{
+    width:100%;
+    padding: 10px;
+}
