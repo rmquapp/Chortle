@@ -29,7 +29,10 @@ body {
 }
 
 .chortle-navbar-right{
-    margin-left: auto;
+  margin-left: auto;
+  height: 100%;
+  position: relative;
+  display: inline-block;
 }
 
 .chortle-nav-icon{
@@ -41,8 +44,6 @@ body {
 .unassigned li {
   margin-left: 35px;
 }
-
-
 
 .glyphicon {
   color: white;
@@ -123,3 +124,41 @@ ul[dnd-list] li {
     margin-bottom: 20px;
     font-size: 13px;
 }
+
+/* https://www.w3schools.com/howto/howto_js_dropdown.asp */
+/* Dropdown Button */
+.dropbtn {
+  border: none;
+  height: 100%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Dropdown button on hover & focus */
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #72A393;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* Show the dropdown menu */
+.show {display:block;}
