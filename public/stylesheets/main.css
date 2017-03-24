@@ -1,4 +1,7 @@
 body {
+    display: flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
     overflow-y: hidden;
     overflow-x: hidden;
     width: 100%;
@@ -8,6 +11,8 @@ body {
     background-color: #80BBA7;
     height: 50px;
     width: 100%;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: row;

@@ -25,6 +25,7 @@
     </div>
     <div class="kids-lists">
       <div class="kid-list">
+        <div class="kids-chores">
         <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Ruby</h6>
         <hr>
         <ul dnd-list="models.lists.Ruby">
@@ -35,8 +36,13 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+        </div>
       </div>
       <div class="kid-list">
+        <div class="kids-chores">
         <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Dexter</h6>
         <hr>
         <ul dnd-list="models.lists.Dexter">
@@ -47,8 +53,13 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+        </div>
       </div>
       <div class="kid-list">
+        <div class="kids-chores">
         <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Toulouse</h6>
         <hr>
         <ul dnd-list="models.lists.Toulouse">
@@ -59,18 +70,27 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+        </div>
       </div>
       <div class="kid-list">
-        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
-        <hr>
-        <ul dnd-list="models.lists.Toulouse">
-          <li ng-repeat="item in models.lists.Toulouse"
-              dnd-draggable="item"
-              dnd-moved="models.lists.Toulouse.splice($index, 1)"
-              dnd-effect-allowed="move">
-            {{item.name}}
-          </li>
-        </ul>
+        <div class="kids-chores">
+          <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
+          <hr>
+          <ul dnd-list="models.lists.Toulouse">
+            <li ng-repeat="item in models.lists.Toulouse"
+                dnd-draggable="item"
+                dnd-moved="models.lists.Toulouse.splice($index, 1)"
+                dnd-effect-allowed="move">
+              {{item.name}}
+            </li>
+          </ul>
+        </div>
+        <div class="kid-bank">
+          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+        </div>
       </div>
     </div>
   </div>
