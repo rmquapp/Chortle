@@ -1,23 +1,48 @@
 body {
-  overflow-y: hidden;
-  overflow-x: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    width: 100%;
 }
 
-.navbar {
-    margin-bottom: 0;
+.chortle-navbar{
     background-color: #80BBA7;
-    border-width: 0;
+    height: 50px;
+    width: 100%;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#chortle-title {
+    color: white;
+    font-family: 'Happy Monkey', cursive;
+    font-size: 26pt;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.app-name{
+}
+
+.chortle-navbar-right{
+    margin-left: auto;
+}
+
+.chortle-nav-icon{
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 24pt;
 }
 
 .unassigned li {
   margin-left: 35px;
 }
 
-#nav-title {
-  color: white;
-  font-family: 'Happy Monkey', cursive;
-  font-size: 1.4em;
-}
+
 
 .glyphicon {
   color: white;
