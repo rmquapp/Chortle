@@ -29,16 +29,21 @@ body {
 }
 
 .chortle-navbar-right{
-  margin-left: auto;
-  height: 100%;
-  position: relative;
-  display: inline-block;
+    margin-left: auto;
+    height: 100%;
+}
+
+.chortle-navbar-right > .dropbtn{
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
 }
 
 .chortle-nav-icon{
     padding-left: 20px;
     padding-right: 20px;
     font-size: 24pt;
+    pointer-events: none;
 }
 
 .unassigned li {
