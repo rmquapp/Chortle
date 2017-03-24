@@ -63,7 +63,7 @@ router.get('/signup', function(req, res, next) {
     if (req.isAuthenticated()) {
         res.redirect('/');
     } else {
-        res.render('pages/parent-registration', { title: 'Sign Up' });
+        res.render('pages/signup', { title: 'Sign Up' });
     }
 });
 
@@ -246,11 +246,6 @@ router.get('/children', function(request, response) {
             }
         })
     });
-});
-
-// Child Registration Page
-router.get('/child-registration', function(request, response) {
-  response.render('pages/child-registration');
 });
 
 module.exports = router;
