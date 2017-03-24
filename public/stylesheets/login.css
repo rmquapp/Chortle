@@ -29,7 +29,7 @@ html, body{
     flex-direction:column;
 }
 
-#chortle-title{
+#chortle-login-title{
     padding-top: 10px;
     font-size: 4em;
     text-align: center;
