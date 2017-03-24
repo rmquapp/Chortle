@@ -75,3 +75,7 @@ img.center {
 #grid_page{
   height: 100%;
 }
+
+.chortle-navbar-right{
+  visibility: collapse;
+}
