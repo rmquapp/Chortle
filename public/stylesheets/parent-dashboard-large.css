@@ -32,7 +32,22 @@
     margin-bottom: auto;
 }
 
-.kid-bank > .img-responsive {
+.kid-bank {
+    background-image: url('/images/piggybank.png');
+    background-size: contain;
     margin-top: auto;
-    max-width: 96px;
+    max-height: 96px;
+    min-height: 96px;
+    width: 96px;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+}
+
+.bank-amount{
+    width: 100%;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 20pt;
 }

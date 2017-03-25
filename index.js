@@ -39,6 +39,10 @@ app.get('/login', function(request, response) {
     response.render('pages/login');
 });
 
+app.get('/images/piggybank.png', function(request, response) {
+    response.render('images/piggybank.png')
+});
+
 /*
     Server side REST API endpoints
  */

@@ -38,7 +38,7 @@
         </ul>
         </div>
         <div class="kid-bank">
-          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+          <h3 class="bank-amount">$6</h3>
         </div>
       </div>
       <div class="kid-list">
@@ -55,7 +55,7 @@
         </ul>
         </div>
         <div class="kid-bank">
-          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+          <h3 class="bank-amount">$8</h3>
         </div>
       </div>
       <div class="kid-list">
@@ -72,24 +72,25 @@
         </ul>
         </div>
         <div class="kid-bank">
-          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+          <h3 class="bank-amount">$5</h3>
         </div>
       </div>
       <div class="kid-list">
-        <div class="kids-chores">
-          <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
-          <hr>
-          <ul dnd-list="models.lists.Toulouse">
-            <li ng-repeat="item in models.lists.Toulouse"
-                dnd-draggable="item"
-                dnd-moved="models.lists.Toulouse.splice($index, 1)"
-                dnd-effect-allowed="move">
-              {{item.name}}
-            </li>
-          </ul>
-        </div>
-        <div class="kid-bank">
-          <img src="images/piggybank.png" alt="Piggy Bank" class="img-responsive">
+          <div class="kids-chores">
+            <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
+            <hr>
+            <ul dnd-list="models.lists.Toulouse">
+              <li ng-repeat="item in models.lists.Toulouse"
+                  dnd-draggable="item"
+                  dnd-moved="models.lists.Toulouse.splice($index, 1)"
+                  dnd-effect-allowed="move">
+                {{item.name}}
+              </li>
+            </ul>
+          </div>
+          <div class="kid-bank">
+            <h3 class="bank-amount">$10</h3>
+          </div>
         </div>
       </div>
     </div>
