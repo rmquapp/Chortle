@@ -5,6 +5,7 @@ html, body{
 }
 
 .parent-view-container{
+    display: -webkit-flex;
     display:flex;
     width: 100%;
     height: 100%;
@@ -16,6 +17,7 @@ html, body{
 }
 
 .kid-name{
+    display: -webkit-flex;
     display: flex;
     align-items: center;
 }
@@ -41,7 +43,6 @@ html, body{
 
 .kid-list{
     width:100%;
-    height: 100%;
     min-width: 200px;
     padding: 10px;
     display: -webkit-flex;
@@ -53,16 +54,17 @@ html, body{
     border-width: 2px;
     margin: 5px;
     border-color: #F2F2F2;
+    overflow-y: auto;
 }
 
 .kid-bank {
     background-image: url('/images/piggybank.png');
     background-size: contain;
     background-repeat: no-repeat;
-    max-height: 95px;
+    height: 95px;
     min-height: 95px;
     width: 95px;
-    min-width:95px;
+    min-width: 95px;
     margin:5px;
     display: -webkit-flex;
     display: flex;

@@ -1,4 +1,5 @@
 body {
+    display: -webkit-flex;
     display: flex;
     flex-direction: column;
     -webkit-flex-direction: column;
