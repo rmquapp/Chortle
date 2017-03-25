@@ -1,6 +1,10 @@
 body {
+  display: flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
   overflow-y: hidden;
-  /*overflow-x: hidden;*/
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .modal {
@@ -131,32 +135,54 @@ textarea {
   border-width: 0;
 }
 
-.unassigned li {
-  margin-left: 35px;
+.chortle-navbar{
+    background-color: #80BBA7;
+    height: 50px;
+    width: 100%;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+    align-items: center;
 }
 
-#nav-title {
-  color: white;
-  font-family: 'Happy Monkey', cursive;
-  font-size: 1.4em;
+#chortle-title {
+    color: white;
+    font-family: 'Happy Monkey', cursive;
+    font-size: 18pt;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.chortle-navbar-right{
+    margin-left: auto;
+    height: 100%;
+}
+
+.chortle-navbar-right > .dropbtn{
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+}
+
+.chortle-nav-icon{
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: 24pt;
+    pointer-events: none;
 }
 
 .glyphicon {
   color: white;
+  font-size: 14pt;
 }
 
 .glyphicon-plus {
   color: #7A7A7A;
-}
-
-#add {
-    margin-left: 35px;
-    background-color: #D4D4D4;
-    display: block;
-    padding: 6px 15px;
-    margin-bottom: 20px;
-    font-weight: 400;
-    font-size: 14px;
 }
 
 #background {
@@ -165,21 +191,6 @@ textarea {
   min-height: 800px;
   height: auto !important;
   height: 800px;
-}
-
-#grid {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0 15px;
-  box-sizing: border-box;
-}
-
-.inner {
-  position: absolute;
-  height: 100%;
-  width: 100%;
 }
 
 /**
@@ -220,3 +231,44 @@ ul[dnd-list] li {
     margin-bottom: 20px;
     font-size: 14px;
 }
+
+/* https://www.w3schools.com/howto/howto_js_dropdown.asp */
+/* Dropdown Button */
+.dropbtn {
+  border: none;
+  height: 100%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Dropdown button on hover & focus */
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #72A393;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 5px;
+  background-color: #f9f9f9;
+  min-width: 105px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+/* Show the dropdown menu */
+.show {display:block;}

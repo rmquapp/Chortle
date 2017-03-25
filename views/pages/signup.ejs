@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <% include ../partials/header.ejs %>
     <link rel="stylesheet" type="text/css" href="/stylesheets/registration.css"/>
 </head>
@@ -11,10 +10,10 @@
 <% include ../partials/nav.ejs %>
 
 <!-- http://bootsnipp.com/snippets/featured/basic-register-page -->
-<div class="row" id="grid page">
+<div class="row" id="grid_page">
     <div class="col-md-7 col-md-offset-1">
         <div class="container-fluid">
-
+            <form id="registration" action="/signup" method="post">
             <div class="form-group col-md-12"></div>
             <div class="form-group col-md-12"></div>
 
@@ -24,27 +23,27 @@
 
             <div class="form-group col-md-6">
                 <label>First Name</label>
-                <input type="" name="" class="form-control" id="" value="">
+                <input type="text" name="first" class="form-control" id="" value="">
             </div>
 
             <div class="form-group col-md-6">
                 <label>Last Name</label>
-                <input type="" name="" class="form-control" id="" value="">
+                <input type="text" name="last" class="form-control" id="" value="">
             </div>
 
             <div class="form-group col-md-12">
                 <label>Username</label>
-                <input type="" name="" class="form-control" id="" value="">
+                <input type="text" name="username" class="form-control" id="" value="">
             </div>
 
             <div class="form-group col-md-12">
                 <label>Email Address</label>
-                <input type="" name="" class="form-control" id="" value="">
+                <input type="text" name="email" class="form-control" id="" value="">
             </div>
 
             <div class="form-group col-md-6">
                 <label>Password</label>
-                <input type="password" name="" class="form-control" id="" value="">
+                <input type="password" name="password" class="form-control" id="" value="">
             </div>
 
             <div class="form-group col-md-6">
@@ -57,6 +56,7 @@
 
             <div class="form-group col-md-6">
                 <button type="Submit" class="btn btn-primary" id="submit">Register</button>
+            </form>
             </div>
         </div>
     </div>
@@ -83,7 +83,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="row">
+            <div class="row grey-row">
                 <img src="/images/piggybank.png" class="center">
             </div>
         </div>

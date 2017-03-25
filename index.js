@@ -30,8 +30,8 @@ app.get('/', function(request, response) {
 });
 
 // Parent Registration Page
-app.get('/parent-registration', function(request, response) {
-    response.render('pages/parent-registration');
+app.get('/signup', function(request, response) {
+    response.render('pages/signup');
 });
 
 // Login Page
@@ -39,9 +39,8 @@ app.get('/login', function(request, response) {
     response.render('pages/login');
 });
 
-// Child Registration Page
-app.get('/child-registration', function(request, response) {
-    response.render('pages/child-registration');
+app.get('/images/piggybank.png', function(request, response) {
+    response.render('images/piggybank.png')
 });
 
 /*

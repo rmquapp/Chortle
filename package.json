@@ -5,14 +5,21 @@
   "engines": {
     "node": "5.9.1"
   },
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node app.js"
   },
   "dependencies": {
-    "pg": "4.x",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.17.1",
+    "bookshelf": "^0.10.3",
     "ejs": "2.4.1",
-    "express": "4.13.3"
+    "express": "4.13.3",
+    "express-session": "^1.15.1",
+    "knex": "^0.12.8",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "pg": "4.x"
   },
   "repository": {
     "type": "git",

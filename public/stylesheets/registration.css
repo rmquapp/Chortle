@@ -1,4 +1,4 @@
-html {
+html, body {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -6,10 +6,11 @@ html {
 
 body.parent {
   height: 100%;
+  width: 100%;
   overflow-y: auto;
 }
 
-h3 {
+h5 {
   text-align: center;
 }
 
@@ -27,6 +28,11 @@ img.center {
   margin-right: auto;
 }
 
+.currKids li {
+  margin-left: 35px;
+  text-align: center;
+}
+
 #ad-list {
   font: 18px sans-serif;
   padding: 30px;
@@ -42,7 +48,10 @@ img.center {
   right: 0;
   bottom: 0;
   height: 100%;
+}
 
+.grey-row{
+  background-color: lightgray;
 }
 
 #side-bar {
@@ -61,4 +70,12 @@ img.center {
   background-color: #003434;
   border: none;
   width: 100%;
+}
+
+#grid_page{
+  height: 100%;
+}
+
+.chortle-navbar-right{
+  visibility: collapse;
 }

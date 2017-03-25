@@ -1,0 +1,28 @@
+.chore-list{
+    width:25%;
+    min-width: 200px;
+    padding: 10px;
+    -webkit-justify-content: flex-end;
+    justify-content: flex-end;
+}
+
+.kids-lists{
+    width:75%;
+    display: -webkit-flex;
+    display:flex;
+    flex-direction:row;
+    overflow-y: scroll;
+}
+
+.kid-list{
+    -webkit-flex-direction: column;
+    flex-direction: column;
+}
+
+.kids-chores{
+    margin-bottom: auto;
+}
+
+.kid-bank {
+    margin-top: auto;
+}

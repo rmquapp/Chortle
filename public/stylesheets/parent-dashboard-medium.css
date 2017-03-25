@@ -1,0 +1,16 @@
+.chore-list{
+    width:40%;
+    min-width: 200px;
+    padding: 10px;
+}
+
+.kids-lists{
+    width:60%;
+    display:flex;
+    flex-direction:column;
+}
+
+.kid-list{
+    width:100%;
+    padding: 10px;
+}

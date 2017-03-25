@@ -1,43 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <% include ../partials/header.ejs %>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/parent-dashboard-common.css"/>
+  <link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="/stylesheets/parent-dashboard-small.css"/>
+  <link rel="stylesheet" type="text/css" media="screen and (min-width: 501px)" href="/stylesheets/parent-dashboard-large.css"/>
 </head>
 
 <body ng-app="parentView" ng-controller="parentViewCtrl">
 <% include ../partials/nav.ejs %>
 
-
-<!--<a href="/" class="lang-logo">
-      <img src="/images/chortle-logo.png">
-</a> -->
-<div id="grid">
-  <div class="row">
-    <div class="three columns" id="background">
-      <h6></h6>
+<div class="parent-view-container">
+    <div class="chore-list">
+      <li class="add-chore" id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
+      <ul dnd-list="models.lists.Unassigned" class="unassigned">
+        <li ng-repeat="item in models.lists.Unassigned"
+          dnd-draggable="item"
+          dnd-moved="models.lists.Unassigned.splice($index, 1)"
+          dnd-effect-allowed="move"
+          class="unassigned">
+          {{item.name}}
+        </li>
+      </ul>
     </div>
-    <div class="nine columns">
-      <h6></h6>
-    </div>
-    <div class="row inner">
-      <div class="three columns">
-        <br>
-        <li id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
-
-        <ul dnd-list="models.lists.Unassigned" class="unassigned">
-          <li ng-repeat="item in models.lists.Unassigned"
-              dnd-draggable="item"
-              dnd-moved="models.lists.Unassigned.splice($index, 1)"
-              dnd-effect-allowed="move"
-              class="unassigned">
-              {{item.name}}
-          </li>
-        </ul>
-      </div>    
-      <div class="three columns">
-        <br>
-        <h6>Ruby</h6>
+    <div class="kids-lists">
+      <div class="kid-list">
+        <div class="kids-chores">
+        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Ruby</h6>
         <hr>
         <ul dnd-list="models.lists.Ruby">
           <li ng-repeat="item in models.lists.Ruby"
@@ -47,10 +36,14 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <h3 class="bank-amount">$6</h3>
+        </div>
       </div>
-      <div class="three columns">
-        <br>
-        <h6>Dexter</h6>
+      <div class="kid-list">
+        <div class="kids-chores">
+        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Dexter</h6>
         <hr>
         <ul dnd-list="models.lists.Dexter">
           <li ng-repeat="item in models.lists.Dexter"
@@ -60,11 +53,14 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <h3 class="bank-amount">$8</h3>
+        </div>
       </div>
-      <div class="three columns">
-        <br>
-        <h6>Toulouse</h6>
-        <!-- <hr width="96%" style="margin-left: 0px;"> -->
+      <div class="kid-list">
+        <div class="kids-chores">
+        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Toulouse</h6>
         <hr>
         <ul dnd-list="models.lists.Toulouse">
           <li ng-repeat="item in models.lists.Toulouse"
@@ -74,6 +70,28 @@
               {{item.name}}
           </li>
         </ul>
+        </div>
+        <div class="kid-bank">
+          <h3 class="bank-amount">$5</h3>
+        </div>
+      </div>
+      <div class="kid-list">
+          <div class="kids-chores">
+            <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
+            <hr>
+            <ul dnd-list="models.lists.Toulouse">
+              <li ng-repeat="item in models.lists.Toulouse"
+                  dnd-draggable="item"
+                  dnd-moved="models.lists.Toulouse.splice($index, 1)"
+                  dnd-effect-allowed="move">
+                {{item.name}}
+              </li>
+            </ul>
+          </div>
+          <div class="kid-bank">
+            <h3 class="bank-amount">$10</h3>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -107,7 +125,6 @@
 
 <script>
 var app = angular.module("parentView", ['dndLists']);
-
 app.controller("parentViewCtrl", function($scope, $http) {
   $http.get('chores').
     success(function(data, status, headers, config) {
