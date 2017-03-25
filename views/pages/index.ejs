@@ -5,7 +5,7 @@
   <% include ../partials/header.ejs %>
 </head>
 
-<body ng-app="myApp" ng-controller="myCtrl">
+<body ng-app="parentView" ng-controller="parentViewCtrl">
 <% include ../partials/nav.ejs %>
 
 
@@ -24,6 +24,7 @@
       <div class="three columns">
         <br>
         <li id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
+
         <ul dnd-list="models.lists.Unassigned" class="unassigned">
           <li ng-repeat="item in models.lists.Unassigned"
               dnd-draggable="item"
@@ -78,53 +79,59 @@
   </div>
 </div>
 
-<script>
-var app = angular.module("myApp", ['dndLists']);
-app.controller("myCtrl", function($scope) {
-      $scope.models = {
-        selected: null,
-        lists: {
-        "Unassigned": [
-          {
-            name: "Pet the dog",
-            description: "",
-            value: 0.5,
-            completed: false
-          }
-        ],
-        "Ruby": [
-          {
-            name: "Wash the dishes",
-            description: "",
-            value: 1,
-            completed: false
-          },
-          {
-            name: "Take out the trash",
-            description: "Do Thursday evening",
-            value: 0.25,
-            completed: true
-          }
-        ],
-        "Dexter": [
-          {
-            name: "Feed the cats",
-            description: "",
-            value: 0.5,
-            completed: false
-          }
-        ],
-        "Toulouse": [
-          {
-            name: "Do the dishes",
-            description: "Dishwasher and dishes in the sink",
-            value: 0.5,
-            completed: false
-          }
-        ]
-      },
+<div id="chore-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <input type="text" id="chore-title" placeholder="Enter Chore Title"/>
+      </div>
+      <div class="modal-body">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+        <div class="input-group">
+          <span class="input-group-addon">$</span>
+          <input type="number" step="any" class="form-control" placeholder="Value"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <section>
+          <button id="js-trigger-overlay" type="button">Done</button>
+        </section>
+        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    };
+
+<script>
+var app = angular.module("parentView", ['dndLists']);
+
+app.controller("parentViewCtrl", function($scope, $http) {
+  $http.get('chores').
+    success(function(data, status, headers, config) {
+      $scope.models = data;
+    }).
+    error(function(data, status, headers, config) {
+      console.log("Error accessing chores endpoint");
+    });
+});
+
+$(function(){
+  $("#add").on("click",function() {
+    $('#chore-modal').modal('show');
+    $('#chore-title').focus();
+    return false;
+  })
+});
+
+// Doesn't work, help pls
+$('#chore-modal').on('show.bs.modal', function () {
+  window.setTimeout(function ()
+  {
+    $('#chore-title').focus();
+  }, 0);
 });
 </script>
 </body>

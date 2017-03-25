@@ -25,7 +25,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.get('/', function(request, response) {
-    console.log(process.env.DATABASE_URL);
+    //console.log(process.env.DATABASE_URL);
   response.render('pages/index');
 });
 
@@ -53,7 +53,7 @@ app.get('/chores', function(request, response) {
 
     var choresJson = {};
 
-    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+    pg.connect(process.env.DATABASE_URL, function (err, client, done) {      
         client.query('SELECT ac.id , ac.name chore_name, ac.description, ac.value, ac.status, ch.name ' +
             'FROM assigned_chore ac LEFT OUTER JOIN child ch ' +
             'ON (ac.owner = ch.id) WHERE ch.p_id = 1', function (err, result) {
@@ -75,11 +75,32 @@ app.get('/chores', function(request, response) {
                             "value": currentChore["value"],
                             "status": currentChore["status"],
                         });
-
                 }
-                response.send(choresJson);
+
+                // Ensure that there are lists for all children and also for unassigned chores
+                var lists = ["Unassigned"];
+                client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
+                    done();
+                    if (err) {
+                        console.error(err);
+                    }
+                    else {
+                        for (var i = 0; i  < result.rows.length; i++) {
+                            var listname = result.rows[i]["name"]
+                            lists.push(result.rows[i]["name"]);
+                        }
+
+                        // Add any empty lists to choresJson, otherwise the drag-and-drop effect won't work
+                        for (var index in lists) {
+                            if (!(lists[index] in choresJson)) {
+                                choresJson[lists[index]] = [];
+                            }
+                        }
+                        response.send({selected: null, lists: choresJson});
+                    }
+                });
             }
-        })
+        });
     });
 });
 
