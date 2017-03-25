@@ -12,6 +12,8 @@
 
 .kids-lists{
     width:100%;
+    padding: 10px;
+    margin-top: 10px;
     display:flex;
     flex-direction:column;
 }
@@ -19,4 +21,18 @@
 .kid-list{
     width:100%;
     padding: 10px;
+}
+
+.kid-list{
+    -webkit-flex-direction: row;
+    flex-direction: row;
+}
+
+.kids-chores{
+    min-width: 250px;
+    margin-right: auto;
+}
+
+.kid-bank {
+    margin-left: auto;
 }
