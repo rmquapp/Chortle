@@ -134,31 +134,53 @@ router.get('/chores', function(request, response) {
                             "status": currentChore["status"],
                         });
                 }
-
-                // Ensure that there are lists for all children and also for unassigned chores
-                var lists = ["Unassigned"];
-                client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
-                    done();
-                    if (err) {
-                        console.error(err);
-                    }
-                    else {
-                        for (var i = 0; i  < result.rows.length; i++) {
-                            var listname = result.rows[i]["name"]
-                            lists.push(result.rows[i]["name"]);
-                        }
-
-                        // Add any empty lists to choresJson, otherwise the drag-and-drop effect won't work
-                        for (var index in lists) {
-                            if (!(lists[index] in choresJson)) {
-                                choresJson[lists[index]] = [];
-                            }
-                        }
-                        response.send({selected: null, lists: choresJson});
-                    }
-                });
             }
         })
+
+        // Get chore templates
+        choresJson["Unassigned"] = [];
+        client.query('SELECT ct.id, ct.name, ct.description, ct.value ' +
+            'FROM chore_template ct LEFT OUTER JOIN parent p ' +
+            'ON (ct.owner = p.id) WHERE p.id = 1', function (err, result) {
+            done();
+            if (err) {
+                console.error(err);
+            }
+            else {
+                for (var i = 0; i  < result.rows.length; i++) {
+                    var currentChore = result.rows[i];
+                    choresJson["Unassigned"].push(
+                        {
+                            "id": currentChore["id"],
+                            "name": currentChore["name"],
+                            "description": currentChore["description"],
+                            "value": currentChore["value"],
+                        });
+                }
+            }
+        })
+
+        // Ensure that there are lists for all children
+        // Otherwise the drag-and-drop effect won't work
+        var lists = [];
+        client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
+            done();
+            if (err) {
+                console.error(err);
+            }
+            else {
+                for (var i = 0; i  < result.rows.length; i++) {
+                    var listname = result.rows[i]["name"]
+                    lists.push(result.rows[i]["name"]);
+                    if (!(listname in choresJson)) {
+                        choresJson[listname] = [];
+                    }
+                }
+
+                // Send to controller
+                response.send({selected: null, lists: choresJson});
+            }
+        });
     });
 });
 
@@ -169,7 +191,7 @@ router.post('/chores', function(req, res, next) {
         res.redirect(307, '/');
     }
     else {
-        var jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
+        var jsonKeys = ['owner', 'name', 'description', 'value'];
 
         var choreToCreate = req.body;
         for (var i = 0; i < jsonKeys.length; i++) {
@@ -178,42 +200,37 @@ router.post('/chores', function(req, res, next) {
             }
 
         }
-        // Check child assigned (owner) exists
-        Model.grabChildCredentials(choreToCreate['owner'], function (error, data) {
-            if (error) {
-                return res.json({"error": error});
-            }
-        });
+        // // Check child assigned (owner) exists
+        // Model.grabChildCredentials(choreToCreate['owner'], function (error, data) {
+        //     if (error) {
+        //         return res.json({"error": error});
+        //     }
+        // });
         // Check parent has child with id == owner
-        Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
-            if (error) {
-                return res.json({"error": error});
-            }
-            else {
-                if (!data.includes(parseInt(choreToCreate['owner']))) {
-                    return res.json({"error": "Child assigned to chore does not belong to parent"});
-                }
-            }
-        });
+        // Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
+        //     if (error) {
+        //         return res.json({"error": error});
+        //     }
+        //     else {
+        //         if (!data.includes(parseInt(choreToCreate['owner']))) {
+        //             return res.json({"error": "Child assigned to chore does not belong to parent"});
+        //         }
+        //     }
+        // });
 
 
-        var assignedChore = new Model.AssignedChore({
+        var choreTemplate = new Model.ChoreTemplate({
             owner       : choreToCreate.owner,
             name        : choreToCreate.name,
             description : choreToCreate.description,
-            value       : choreToCreate.value,
-            status      : choreToCreate.status
+            value       : choreToCreate.value
         });
 
-        assignedChore.save({}, {method: 'insert'}).then(function(model) {
+        choreTemplate.save({}, {method: 'insert'}).then(function(model) {
 
-            res.json({"message": "Chore created Successfully"});
+            res.json(choreTemplate);
         });
     }
-
-
-
-
 });
 
 

@@ -13,11 +13,13 @@
 <div class="parent-view-container">
     <div class="chore-list">
       <li class="add-chore" id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
-      <ul dnd-list="models.lists.Unassigned" class="unassigned">
+      <ul dnd-list="models.lists.Unassigned" class="unassigned"
+      dnd-effect-allowed="copy">
         <li ng-repeat="item in models.lists.Unassigned"
           dnd-draggable="item"
-          dnd-moved="models.lists.Unassigned.splice($index, 1)"
-          dnd-effect-allowed="move"
+          dnd-selected="choreClicked(item, $index, 'Unassigned')"
+          dnd-copied="copiedCallback()"
+          dnd-effect-allowed="link"
           class="unassigned">
           {{item.name}}
         </li>
@@ -30,6 +32,7 @@
         <hr>
         <ul dnd-list="models.lists.Ruby">
           <li ng-repeat="item in models.lists.Ruby"
+              dnd-selected="choreClicked(item, index, 'Ruby')"
               dnd-draggable="item"
               dnd-moved="models.lists.Ruby.splice($index, 1)"
               dnd-effect-allowed="move">
@@ -48,7 +51,8 @@
         <ul dnd-list="models.lists.Dexter">
           <li ng-repeat="item in models.lists.Dexter"
               dnd-draggable="item"
-              dnd-moved="models.lists.Dexter.splice($index, 1)"
+              dnd-selected="choreClicked(item, index, 'Dexter')"
+              dnd-moved="models.lists.Dexter.splice()"
               dnd-effect-allowed="move">
               {{item.name}}
           </li>
@@ -65,6 +69,7 @@
         <ul dnd-list="models.lists.Toulouse">
           <li ng-repeat="item in models.lists.Toulouse"
               dnd-draggable="item"
+              dnd-selected="choreClicked(item, index, 'Toulouse')"
               dnd-moved="models.lists.Toulouse.splice($index, 1)"
               dnd-effect-allowed="move">
               {{item.name}}
@@ -97,24 +102,52 @@
   </div>
 </div>
 
-<div id="chore-modal" class="modal fade">
+<div id="add-chore-modal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <input type="text" id="chore-title" placeholder="Enter Chore Title"/>
+        <input type="text" id="add-chore-title" class="chore-title" placeholder="Enter Chore Title"/>
       </div>
       <div class="modal-body">
-        <label for="description">Description</label>
-        <textarea id="description" name="description" rows="4"></textarea>
+        <label for="add-chore-description">Description</label>
+        <textarea id="add-chore-description" name="description" rows="4"></textarea>
         <div class="input-group">
           <span class="input-group-addon">$</span>
-          <input type="number" step="any" class="form-control" placeholder="Value"/>
+          <input id="add-chore-value" type="number" step="any" class="form-control" placeholder="Value"/>
         </div>
       </div>
       <div class="modal-footer">
         <section>
-          <button id="js-trigger-overlay" type="button">Done</button>
+          <button id="js-trigger-overlay" ng-click="addChore()" type="button">Done</button>
+        </section>
+        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="edit-chore-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <input type="text" id="edit-chore-title" class="chore-title" placeholder="Enter Chore Title"/>
+      </div>
+      <div class="modal-body">
+        <label for="edit-chore-description" class="description-label">Description</label>
+        <textarea id="edit-chore-description" name="description" rows="4"></textarea>
+        <div class="input-group">
+          <span class="input-group-addon">$</span>
+          <input id="edit-chore-value" type="number" step="any" class="form-control" placeholder="Value"/>
+        </div>
+        </br>
+        <select id="selectChild">
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button id="delete-button" ng-click="deleteChore()" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+        <section>
+          <button id="js-trigger-overlay" ng-click="saveChore()" type="button">Save</button>
         </section>
         <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
       </div>
@@ -126,19 +159,146 @@
 <script>
 var app = angular.module("parentView", ['dndLists']);
 app.controller("parentViewCtrl", function($scope, $http) {
+
   $http.get('chores').
     success(function(data, status, headers, config) {
       $scope.models = data;
     }).
     error(function(data, status, headers, config) {
       console.log("Error accessing chores endpoint");
+  });
+
+  $scope.copiedCallback = function() {
+    // Remove duplicates in list of unassigned chores so they can't be dragged
+    // back onto the list
+    var unassigned = $scope.models.lists.Unassigned;
+    var arr = {};
+    for ( var i=0, len=unassigned.length; i < len; i++ ) {
+        arr[unassigned[i]['id']] = unassigned[i];
+    }
+    unassigned = new Array();
+    for ( var key in arr ) {
+        unassigned.push(arr[key]);
+    }
+
+    // Update list of unassigned chores
+    $scope.models.lists.Unassigned = unassigned;
+  };
+
+  $scope.addChore = function() {
+    var newChore =
+    {
+      "owner": 1,
+      "name": $('#add-chore-title').val(),
+      "description": $('#chore-description').val(),
+      "value": parseInt($('#chore-value').val()) || 0
+    };
+    $('#add-chore-modal').modal('hide');
+
+    // Add new chore to database
+    $http.post("chores", newChore).success(function(chore) {
+        // Add new chore to list of chore templates
+        $scope.models.lists.Unassigned.push(chore);
+    }).error(function(error) {
+        console.log("Failed to add chore");
     });
+  };
+
+  $scope.saveChore = function() {
+    var editedChore =
+    {
+      "owner": 1,
+      "name": $('#edit-chore-title').val(),
+      "description": $('#edit-chore-description').val(),
+      "value": parseInt($('#edit-chore-value').val()) || 0
+    }
+
+    var lists = $scope.models.lists;
+    var assignee = $scope.models.selected[1] || "Unassigned";
+    var item = $scope.models.selected[0];
+
+    var list = lists[assignee];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] == item) {
+        var newAssignee = $('#selectChild').val() || "Unassigned";
+
+        // If the assignee has not been changed, update the chore
+        if (assignee == newAssignee) {
+          $scope.models.lists[assignee][i] = editedChore;
+          $('#edit-chore-modal').modal('hide');
+        }
+
+        // If the assignee has changed, move the updated chore
+        else {
+          if (assignee != "Unassigned") {
+            $scope.models.lists[assignee].splice(i, 1);
+          }
+          $scope.models.lists[newAssignee].push(editedChore);
+        }
+        break;
+      }
+    }
+    $('#edit-chore-modal').modal('hide');
+  }
+
+  $scope.choreClicked = function(item, index, assignee) {
+    $('#edit-chore-modal').modal('show');
+
+    $('#edit-chore-title').val(item['name']);
+    $('#edit-chore-description').val(item['description']);
+    $('#edit-chore-value').val(item['value']);
+
+    if (assignee == "Unassigned") {
+      assignee = "";
+    }
+    $scope.models.selected = [item, assignee];
+
+    // Remove old select options
+    removeOptions(document.getElementById('selectChild'));
+
+    // Populate select input for assigning a chore to a child
+    var children = ["Ruby", "Dexter", "Toulouse"];
+    var index = children.indexOf(assignee);
+    if (index > -1) {
+      children.splice(index, 1);
+    }
+
+    children.unshift(assignee);
+
+    var select = document.getElementById('selectChild');
+    for (var i = 0; i < children.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = children[i];
+        opt.innerHTML = "&nbsp&nbsp" + children[i] + "&nbsp&nbsp&nbsp&nbsp&nbsp";
+        select.appendChild(opt);
+    }
+  }
+
+  $scope.deleteChore = function() {
+    var lists = $scope.models.lists;   
+    var assignee = $scope.models.selected[1] || "Unassigned";
+    var item = $scope.models.selected[0];
+
+    var list = lists[assignee];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] == item) {
+        $scope.models.lists[assignee].splice(i, 1);
+        break;
+      }
+    }
+    $('#edit-chore-modal').modal('hide');
+  }
 });
 
 $(function(){
   $("#add").on("click",function() {
-    $('#chore-modal').modal('show');
-    $('#chore-title').focus();
+    $('#add-chore-modal').modal('show');
+
+    $('#add-chore-title').val("");
+    $('#add-chore-description').val(null);
+    $('#add-chore-value').val(null);
+
+    $('#add-chore-title').focus();
     return false;
   })
 });
@@ -147,9 +307,18 @@ $(function(){
 $('#chore-modal').on('show.bs.modal', function () {
   window.setTimeout(function ()
   {
-    $('#chore-title').focus();
+    $('#add-chore-title').focus();
   }, 0);
 });
+
+function removeOptions(selectbox)
+{
+    var i;
+    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
+    {
+        selectbox.remove(i);
+    }
+}
 </script>
 </body>
 </html>
