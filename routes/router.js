@@ -3,16 +3,16 @@
  *
  * The endpoints of the API will reside in here as well as the calling to render the pages
  */
-var express = require('express');
-var router = express.Router();
-var passport = require('passport');
-var pg = require('pg'); // USING THIS TEMPORARILY
+let express = require('express');
+let router = express.Router();
+let passport = require('passport');
+let pg = require('pg'); // USING THIS TEMPORARILY
 // Used to encrypt user password before adding it to db.
-var bcrypt = require('bcrypt-nodejs');
+let bcrypt = require('bcrypt-nodejs');
 
 // Bookshelf postgres db ORM object. Basically it makes
 // it simple and less error port to insert/query the db.
-var Model = require('../model.js');
+let Model = require('../model.js');
 
 router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
@@ -20,7 +20,7 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        var user = req.user;
+        let user = req.user;
         res.render('pages/index');
 
     }
