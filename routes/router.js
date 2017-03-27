@@ -3,16 +3,16 @@
  *
  * The endpoints of the API will reside in here as well as the calling to render the pages
  */
-var express = require('express');
-var router = express.Router();
-var passport = require('passport');
-var pg = require('pg'); // USING THIS TEMPORARILY
+let express = require('express');
+let router = express.Router();
+let passport = require('passport');
+let pg = require('pg'); // USING THIS TEMPORARILY
 // Used to encrypt user password before adding it to db.
-var bcrypt = require('bcrypt-nodejs');
+let bcrypt = require('bcrypt-nodejs');
 
 // Bookshelf postgres db ORM object. Basically it makes
 // it simple and less error port to insert/query the db.
-var Model = require('../model.js');
+let Model = require('../model.js');
 
 router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
@@ -90,7 +90,7 @@ router.post('/signup', function(req, res, next) {
                 name: parent.first + " " + parent.last});
 
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
-                // Sign in the newly registered uesr
+                // Sign in the newly registered user
                 res.redirect(307, '/signin');
             });
         }
@@ -104,6 +104,42 @@ router.get('/signout', function(req, res, next) {
         req.logout();
         res.redirect('/signin');
     }
+});
+
+// Processing the page for adding a child
+router.post('/addChild', function(req, res, next) {
+  // Here, req.body is { name, username, pwd, pwd-repeat }
+  let child = req.body;
+
+  // Make sure password typed correctly
+  if (child.pwd !== child.pwdRepeat) {
+    res.render('pages/index', { title: '', errorMessage: 'passwords must match' });
+    return;
+  }
+
+  // Try and fetch a username to see if it already exists.
+  let usernamePromise = new Model.Child({ username: child.username }).fetch();
+
+  return usernamePromise.then(function(model) {
+    if (model) {
+      res.render('pages/index', { title: '', errorMessage: 'username already exists' });
+    } else {
+      let password = child.pwd;
+      let hash = bcrypt.hashSync(password);
+
+      // Make a new postgres db row of the account
+      let newChild = new Model.Child({
+        name: child.name,
+        username: child.username,
+        password: hash
+      });
+
+      newChild.save({}, {method: 'insert'}).then(function(model) {
+        // close modal and refresh page
+        res.redirect('/');
+      });
+    }
+  });
 });
 
 // Get the chores from the assigned_chore table associated to a parent
@@ -122,7 +158,7 @@ router.get('/chores', function(request, response) {
             else {
                 for (var i = 0; i  < result.rows.length; i++) {
                     var currentChore = result.rows[i];
-                    if (choresJson[currentChore["name"]] == undefined) {
+                    if (choresJson[currentChore["name"]] === undefined) {
                         choresJson[currentChore["name"]] = [];
                     }
                     choresJson[currentChore["name"]].push(

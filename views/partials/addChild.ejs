@@ -1,9 +1,10 @@
 <link rel="stylesheet" type="text/css" href="/stylesheets/addChild.css" />
 
+<!-- https://www.w3schools.com/howto/howto_css_signup_form.asp -->
 <!-- The Modal (contains the Sign Up form) -->
 <div id="addChild" class="modal">
     <span onclick="document.getElementById('addChild').classList.remove('show')" class="close" title="Close Modal">&times;</span>
-    <form class="modal-content animate" action="">
+    <form class="modal-content animate" action="/addChild" method="post">
         <div class="container">
             <h3>Add A Child</h3>
             <label><b>Child Name</b></label>
