@@ -7,7 +7,7 @@ module.exports = {
     client: 'postgresql',
     connection: {
                 host    : '127.0.0.1',
-                user    : 'Diaz',
+                user    : process.env.whoami,
                 password: null,
                 database: 'chortle-seng513',
                 charset : 'utf8',
