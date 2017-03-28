@@ -18,10 +18,12 @@ router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
     // to the signin page.
     if (!req.isAuthenticated()) {
+        console.log("Not authenticated");
         res.redirect('/signin');
     } else {
         let user = req.user;
         res.render('pages/index');
+        console.log("authenticated");
 
     }
 });
@@ -151,77 +153,19 @@ router.get('/chores', function(request, response) {
 
     var choresJson = {};
 
-    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-        client.query('SELECT ac.id , ac.name chore_name, ac.description, ac.value, ac.status, ch.name ' +
-            'FROM assigned_chore ac LEFT OUTER JOIN child ch ' +
-            'ON (ac.owner = ch.id) WHERE ch.p_id = 1', function (err, result) {
-            done();
-            if (err) {
-                console.error(err);
-            }
-            else {
-                for (var i = 0; i  < result.rows.length; i++) {
-                    var currentChore = result.rows[i];
-                    if (choresJson[currentChore["name"]] === undefined) {
-                        choresJson[currentChore["name"]] = [];
-                    }
-                    choresJson[currentChore["name"]].push(
-                        {
-                            "id": currentChore["id"],
-                            "name": currentChore["chore_name"],
-                            "description": currentChore["description"],
-                            "value": currentChore["value"],
-                            "status": currentChore["status"],
-                        });
-                }
-            }
-        })
+    Model.getAssignedChoresParent(1, function (error, data) {
+        if (error) {
+            response.send({error: error});
+        }
+        else {
+            if (data) {
+                response.send(data);
 
-        // Get chore templates
-        choresJson["Unassigned"] = [];
-        client.query('SELECT ct.id, ct.name, ct.description, ct.value ' +
-            'FROM chore_template ct LEFT OUTER JOIN parent p ' +
-            'ON (ct.owner = p.id) WHERE p.id = 1', function (err, result) {
-            done();
-            if (err) {
-                console.error(err);
             }
-            else {
-                for (var i = 0; i  < result.rows.length; i++) {
-                    var currentChore = result.rows[i];
-                    choresJson["Unassigned"].push(
-                        {
-                            "id": currentChore["id"],
-                            "name": currentChore["name"],
-                            "description": currentChore["description"],
-                            "value": currentChore["value"],
-                        });
-                }
-            }
-        });
 
-        // Ensure that there are lists for all children
-        // Otherwise the drag-and-drop effect won't work
-        var lists = [];
-        client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
-            done();
-            if (err) {
-                console.error(err);
-            }
-            else {
-                for (var i = 0; i  < result.rows.length; i++) {
-                    var listname = result.rows[i]["name"]
-                    lists.push(result.rows[i]["name"]);
-                    if (!(listname in choresJson)) {
-                        choresJson[listname] = [];
-                    }
-                }
-
-                // Send to controller
-                response.send({selected: null, lists: choresJson});
-            }
-        });
+        }
     });
+
 });
 
 
@@ -279,51 +223,35 @@ router.get('/chore_template', function(request, response) {
 
     var choresTemplateJson = [];
 
-    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-        client.query('SELECT ct.id , ct.name, ct.description, ct.value ' +
-            'FROM chore_template ct ' +
-            'WHERE ct.owner = 1', function (err, result) {
-            done();
-            if (err) {
-                console.error(err);
+    Model.getChoreTemplateParent(1, function (error, data) {
+        if (error) {
+            response.send({error: error});
+        }
+        else {
+            if (data) {
+                response.send({chore_template: data});
             }
-            else {
-                for (var i = 0; i  < result.rows.length; i++) {
-                    var currentChore = result.rows[i];
-                    choresTemplateJson.push(
-                        {
-                            "id": currentChore["id"],
-                            "name": currentChore["name"],
-                            "description": currentChore["description"],
-                            "value": currentChore["value"]
-                        });
-                }
-                response.send({"chore_template": choresTemplateJson});
-            }
-        })
+        }
     });
+
 });
 
 
 // Get the children from the child table
 router.get('/children', function(request, response) {
     var children = [];
-    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-        client.query('SELECT ch.id , ch.name, ch.username ' +
-            'FROM child ch ' +
-            'WHERE ch.p_id = 1', function (err, result) {
-            done();
-            if (err) {
-                console.error(err);
+
+    Model.grabChildrenFromParent(1, function(error, data) {
+        if (error) {
+            response.send({error: error});
+        }
+        else {
+            if (data) {
+                response.send({children: data});
             }
-            else {
-                for (var i = 0; i  < result.rows.length; i++) {
-                    children.push(result.rows[i]);
-                }
-                response.send({"children": children});
-            }
-        })
+        }
     });
+
 });
 
 module.exports = router;

@@ -127,7 +127,7 @@ function createNewChoreTemplate(callback) {
 function grabChildrenFromParent(parentId, callback) {
     var childrenFromParent = [];
 
-    knex.select('child.id')
+    knex.select('child.id', 'child.name')
         .from('child')
         .where('child.p_id', '=', parentId).then( function (row) {
             if (row.length <= 0) {
@@ -135,11 +135,66 @@ function grabChildrenFromParent(parentId, callback) {
             }
             else {
                 for (var i = 0; i < row.length; i++) {
-                    childrenFromParent.push(row[i].id);
+                    childrenFromParent.push(row[i]);
                 }
                 callback(null, childrenFromParent);
             }
     })
+}
+
+// Given the child Id, obtain all the chores assigned to it
+function getAllAssignedChores(childId, callback) {
+    var assignedChores = [];
+
+    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value', 'assigned_chore.status')
+        .from('assigned_chore')
+        .where('assigned_chore.owner', '=', childId). then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not assigned chores for child', null);
+            }
+            else {
+                for (var i = 0; i < row.length; i++) {
+                    assignedChores.push(row[i]);
+                }
+                callback(null, {assigned_chores: assignedChores});
+            }
+    });
+}
+
+function getAssignedChoresParent(parentId, callback) {
+    var assignedChores = [];
+
+    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value',
+        'assigned_chore.status', 'child.name as child_name')
+        .from('assigned_chore').leftOuterJoin('child', 'child.p_id', parentId)
+        .then ( function (row) {
+        if (row.length <= 0) {
+            callback('Could not find assigned chores', null);
+        }
+        else {
+            for (var i = 0; i < row.length; i++) {
+                assignedChores.push(row[i]);
+            }
+            callback(null, {assigned_chores: assignedChores});
+        }
+    });
+}
+
+function getChoreTemplateParent(parentId, callback) {
+    var choreTemplate = [];
+
+    knex.select('chore_template.id', 'chore_template.owner', 'chore_template.name', 'chore_template.description',
+        'chore_template.value')
+        .from('chore_template')
+        .where('chore_template.owner', '=', parentId)
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find chores template', null);
+            }
+            else {
+                callback(null, {chore_template: row});
+            }
+        });
 }
 
 module.exports = {
@@ -150,6 +205,9 @@ module.exports = {
     createNewAssignedChore  : createNewAssignedChore,
     createNewChoreTemplate  : createNewChoreTemplate,
     grabChildrenFromParent  : grabChildrenFromParent,
+    getAllAssignedChores    : getAllAssignedChores,
+    getAssignedChoresParent : getAssignedChoresParent,
+    getChoreTemplateParent  : getChoreTemplateParent,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
