@@ -7,8 +7,8 @@ function addChild() {
     url: '/addChild',
     type: "POST",
     data: $("#addChildForm").serialize(),
-    error: function (response, error) {
-      alert(error);
+    error: function (response) {
+      alert(response);
     }
   });
 }
