@@ -111,9 +111,11 @@ router.post('/addChild', function(req, res, next) {
   // Here, req.body is { name, username, pwd, pwd-repeat }
   let child = req.body;
 
+  console.log(child.pwd);
+  console.log(child.pwdRepeat);
+
   // Make sure password typed correctly
   if (child.pwd !== child.pwdRepeat) {
-    console.log("pwd err");
     res.status(500).send({ error: 'password mismatch'});
     return;
   }
@@ -123,7 +125,6 @@ router.post('/addChild', function(req, res, next) {
 
   return usernamePromise.then(function(model) {
     if (model) {
-      console.log("username err");
       res.status(500).send({ error: 'username already exists'});
     } else {
       let password = child.pwd;
@@ -133,12 +134,13 @@ router.post('/addChild', function(req, res, next) {
       let newChild = new Model.Child({
         name: child.name,
         username: child.username,
+        p_id: 1,
         password: hash
       });
 
       newChild.save({}, {method: 'insert'}).then(function(model) {
         // close modal and refresh page
-        res.render('pages/index');
+        res.redirect('/');
       });
     }
   });

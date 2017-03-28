@@ -8,8 +8,7 @@ function addChild() {
     type: "POST",
     data: $("#addChildForm").serialize(),
     error: function (response) {
-      console.log(response);
-      $('#users').append(response);
+      $('#users').append(response.responseText.error);
     }
   });
 }
