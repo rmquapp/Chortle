@@ -18,12 +18,10 @@ router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
     // to the signin page.
     if (!req.isAuthenticated()) {
-        console.log("Not authenticated");
         res.redirect('/signin');
     } else {
         let user = req.user;
         res.render('pages/index');
-        console.log("authenticated");
 
     }
 });
@@ -31,34 +29,18 @@ router.get('/', function(req, res, next) {
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/signin', function(req, res, next) {
     if (req.isAuthenticated()) {
-        res.redirect('/');
+        res.render('/');
     } else {
         res.render('pages/login');
     }
 });
 
 // Authenticate user functionality
-router.post('/signin', function(req, res, next) {
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/signin'
-    }, function(err, user, info) {
-        if (err) {
-            return res.render('pages/index', { title: 'Sign In', errorMessage: err.message });
-        }
+router.post('/signin', passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/signin'
+}));
 
-        if (!user) {
-            return res.render('pages/index', { title: 'Sign In', errorMessage: info.message });
-        }
-        return req.logIn(user, function(err) {
-            if (err) {
-                return res.render('/', { title: 'Sign In', errorMessage: err.message });
-            } else {
-                return res.redirect('/');
-            }
-        });
-    })(req, res, next);
-});
 
 // Serve page for signup
 router.get('/signup', function(req, res, next) {
@@ -150,22 +132,20 @@ router.post('/addChild', function(req, res, next) {
 
 // Get the chores from the assigned_chore table associated to a parent
 router.get('/chores', function(request, response) {
-
-    var choresJson = {};
-
-    Model.getAssignedChoresParent(1, function (error, data) {
-        if (error) {
-            response.send({error: error});
-        }
-        else {
-            if (data) {
-                response.send(data);
-
+    if (request.isAuthenticated()) {
+        Model.getAssignedChoresParent(1, function (error, data) {
+            if (error) {
+                response.send({error: error});
             }
-
-        }
-    });
-
+            else {
+                if (data) {
+                    response.send(data);
+                }
+            }
+        });
+    } else {
+        response.send({error: 'User not logged in'});
+    }
 });
 
 
