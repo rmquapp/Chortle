@@ -113,7 +113,7 @@ router.post('/addChild', function(req, res, next) {
 
   // Make sure password typed correctly
   if (child.pwd !== child.pwdRepeat) {
-    res.render('pages/index', { title: '', errorMessage: 'passwords must match' });
+    res.send(500,'password mismatch');
     return;
   }
 
@@ -122,7 +122,7 @@ router.post('/addChild', function(req, res, next) {
 
   return usernamePromise.then(function(model) {
     if (model) {
-      res.render('pages/index', { title: '', errorMessage: 'username already exists' });
+      res.send(500,'username already exists');
     } else {
       let password = child.pwd;
       let hash = bcrypt.hashSync(password);
@@ -136,7 +136,7 @@ router.post('/addChild', function(req, res, next) {
 
       newChild.save({}, {method: 'insert'}).then(function(model) {
         // close modal and refresh page
-        res.redirect('/');
+        res.render('pages/index');
       });
     }
   });
@@ -194,7 +194,7 @@ router.get('/chores', function(request, response) {
                         });
                 }
             }
-        })
+        });
 
         // Ensure that there are lists for all children
         // Otherwise the drag-and-drop effect won't work

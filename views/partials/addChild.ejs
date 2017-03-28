@@ -1,10 +1,11 @@
 <link rel="stylesheet" type="text/css" href="/stylesheets/addChild.css" />
+<script src="scripts/addChild.js"></script>
 
 <!-- https://www.w3schools.com/howto/howto_css_signup_form.asp -->
 <!-- The Modal (contains the Sign Up form) -->
 <div id="addChild" class="modal">
     <span onclick="document.getElementById('addChild').classList.remove('show')" class="close" title="Close Modal">&times;</span>
-    <form class="modal-content animate" action="/addChild" method="post">
+    <form class="modal-content animate" id="addChildForm">
         <div class="container">
             <h3>Add A Child</h3>
             <label><b>Child Name</b></label>
@@ -23,7 +24,7 @@
 
             <div class="clearfix">
                 <button type="button" onclick="document.getElementById('addChild').classList.remove('show')" class="cancel">Cancel</button>
-                <button type="submit" class="submit">Submit</button>
+                <button type="submit" class="submit" onclick="addChild()">Submit</button>
             </div>
         </div>
     </form>
