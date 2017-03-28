@@ -113,7 +113,8 @@ router.post('/addChild', function(req, res, next) {
 
   // Make sure password typed correctly
   if (child.pwd !== child.pwdRepeat) {
-    res.send(500,'password mismatch');
+    console.log("pwd err");
+    res.status(500).send({ error: 'password mismatch'});
     return;
   }
 
@@ -122,7 +123,8 @@ router.post('/addChild', function(req, res, next) {
 
   return usernamePromise.then(function(model) {
     if (model) {
-      res.send(500,'username already exists');
+      console.log("username err");
+      res.status(500).send({ error: 'username already exists'});
     } else {
       let password = child.pwd;
       let hash = bcrypt.hashSync(password);
