@@ -14,6 +14,14 @@ let bcrypt = require('bcrypt-nodejs');
 // it simple and less error port to insert/query the db.
 let Model = require('../model.js');
 
+/*
+ * Error messages
+ */
+let ERROR = {
+    NOT_LOGGED: "User not logged in",
+    NOT_AUTHORIZED: "User not authorized to do this change",
+};
+
 router.get('/', function(req, res, next) {
     // If user is not authenticated, redirect them
     // to the signin page.
@@ -240,6 +248,176 @@ router.post('/chore-template', function(req, res, next) {
 });
 
 
+/**
+ *
+ * Chore template endpoints
+ */
+
+/*
+ * Via GET https://chortle-seng513.herokuapp.com/chore_template
+ *
+ * It requires user authenticated
+ * It returns all the chore_template entries found for user (parent)
+ * in an array following this format:
+ *  {
+ *      id: 2, (id of the chore_template
+ *      owner: 2 (parent.id of chore template
+ *      name: "Name of the chore template",
+ *      description: "Description of this chore template",
+ *      value: 20 (monetary value of this chore)
+ *  }
+ */
+router.get('/chore_template', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let parentId = request.user.local.id;
+        Model.getChoreTemplateParent(parentId, function (error, data) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (data) {
+                    response.send(data);
+                }
+            }
+        });
+    }
+});
+
+/*
+ * Via POST https://chortle-seng513.herokuapp.com/chore_template
+ * Requires user authenticated and a form with the following:
+ * {
+ *  name: "Name of chore template",
+ *  description: "Description of this chore template",
+ *  value: 20
+ * }
+ * It returns a json object with the chore_template that was just created
+ */
+router.post('/chore_template', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['name', 'description', 'value'];
+        let parentId = request.user.local.id;
+
+        // Ensure name, description and value are present in the form received
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+
+        // Create new chore_template object
+        var choreTemplate = new Model.ChoreTemplate({
+            owner : parentId,
+            name  : request.body.name,
+            description : request.body.description,
+            value : request.body.value
+        });
+
+        choreTemplate.save({}, {method: 'insert'}).then ( function (model) {
+            response.json(model);
+        });
+
+    }
+});
+
+/*
+ * Via PUT https://chortle-seng513.herokuapp.com/chore_template
+ * Requires user authenticated and a form with the following:
+ * {
+ *  id : 2 (id of the chore_template)
+ *  name : "Name of chore template",
+ *  description : "Description of this chore template",
+ *  value : 20
+ * }
+ * It returns a json object with the chore_template that was updated
+ */
+router.put('/chore_template', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['id', 'name', 'description', 'value'];
+        let parentId = request.user.local.id;
+        // Ensure id, name, description and value are present in the form received
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+
+        // Obtain chore_template from db, ensure it belongs to parent with id parentId
+        Model.getChoreTemplate(request.body.id, function (error, oldChoreTemplate) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                if (oldChoreTemplate.owner != parentId) {
+                    return response.send({error: ERROR.NOT_AUTHORIZED});
+                }
+                else {
+                    // Create new chore_template object
+                    var choreTemplate = new Model.ChoreTemplate({
+                        id          : request.body.id,
+                        owner       : parentId,
+                        name        : request.body.name,
+                        description : request.body.description,
+                        value       : request.body.value
+                    });
+
+                    choreTemplate.save({}, {method: 'update'}).then ( function (model) {
+                        response.json(model);
+                    });
+                }
+            }
+        });
+
+    }
+});
+
+/*
+ * Via DELETE https://chortle-seng513.herokuapp.com/chore_template/:id
+ * Requires user authenticated. It will only delete chore_template entries that belong to parent
+ * It returns a json object with the message
+ */
+router.delete('/chore_template/:id', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let choreId = request.params.id;
+        let parentId = request.user.local.id;
+        if (choreId) {
+            Model.getChoreTemplate(choreId, function (error, oldChoreTemplate) {
+                if (error) {
+                    return response.send({error: error});
+                }
+                else {
+
+                    if (oldChoreTemplate.owner !== parentId) {
+                        return response.send({error: ERROR.NOT_AUTHORIZED});
+                    }
+                    else {
+                        Model.deleteChoreTemplate(choreId, function (error, message) {
+                           if (error) {
+                               return response.send({error: error});
+                           }
+                           else {
+                               response.send({delete_chore_template: message});
+                           }
+                        });
+                    }
+
+                }
+            });
+        }
+    }
+});
 // Function to create chores
 router.post('/chores', function(req, res, next) {
     if (!req.isAuthenticated()) {
@@ -290,25 +468,6 @@ router.post('/chores', function(req, res, next) {
 });
 
 
-// Get the chore template associated to a parent
-router.get('/chore_template', function(request, response) {
-
-    var choresTemplateJson = [];
-
-    Model.getChoreTemplateParent(1, function (error, data) {
-        if (error) {
-            response.send({error: error});
-        }
-        else {
-            if (data) {
-                response.send({chore_template: data});
-            }
-        }
-    });
-
-});
-
-
 // Get the children from the child table
 router.get('/children', function(request, response) {
     var children = [];
@@ -325,5 +484,6 @@ router.get('/children', function(request, response) {
     });
 
 });
+
 
 module.exports = router;

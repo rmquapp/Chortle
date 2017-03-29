@@ -1,12 +1,13 @@
-var express       = require('express'),
-    Model         = require('./model'),
-    router        = require('./routes/router.js'),
-    path          = require('path'),
-    bcrypt        = require('bcrypt-nodejs'),
-    passport      = require('passport'),
-    session       = require('express-session'),
-    bodyParser    = require('body-parser'),
-    app           = express();
+var express             = require('express'),
+    Model               = require('./model'),
+    router              = require('./routes/router.js'),
+    path                = require('path'),
+    bcrypt              = require('bcrypt-nodejs'),
+    passport            = require('passport'),
+    session             = require('express-session'),
+    bodyParser          = require('body-parser'),
+    expressSanitizer    = require('express-sanitizer');
+    app                 = express();
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -16,6 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(expressSanitizer());
 app.use(bodyParser.json());
 app.use(session({
     resave: true,

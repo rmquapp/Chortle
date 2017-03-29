@@ -56,6 +56,7 @@ function grabParentCredentials(userId, callback) {
         local: {
             username: null,
             password: null,
+            id:       null
         },
     };
 
@@ -72,6 +73,7 @@ function grabParentCredentials(userId, callback) {
             // Fill in loginParent JSON
             loginParent.local.username      = row.username;
             loginParent.local.password      = row.password;
+            loginParent.local.id            = row.id;
 
             callback(null, loginParent);
         }
@@ -197,6 +199,37 @@ function getChoreTemplateParent(parentId, callback) {
         });
 }
 
+function getChoreTemplate(choreId, callback) {
+    var choreTemplate = null;
+
+    knex.select('chore_template.id', 'chore_template.owner', 'chore_template.name', 'chore_template.description',
+        'chore_template.value')
+        .from('chore_template')
+        .where('chore_template.id', '=', choreId)
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find chores template', null);
+            }
+            else {
+                callback(null, row[0]);
+            }
+        });
+}
+
+function deleteChoreTemplate(choreId, callback) {
+
+    knex('chore_template')
+        .where('chore_template.id', '=', choreId)
+        .del()
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find chores template', null);
+            }
+            else {
+                callback(null, " chore_template with id " + choreId + " deleted");
+            }
+        });
+}
 module.exports = {
     createNewParent         : createNewParent,
     grabParentCredentials   : grabParentCredentials,
@@ -208,6 +241,8 @@ module.exports = {
     getAllAssignedChores    : getAllAssignedChores,
     getAssignedChoresParent : getAssignedChoresParent,
     getChoreTemplateParent  : getChoreTemplateParent,
+    getChoreTemplate        : getChoreTemplate,
+    deleteChoreTemplate     : deleteChoreTemplate,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
