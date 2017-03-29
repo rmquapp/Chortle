@@ -675,7 +675,7 @@ router.delete('/assigned_chore', function (request, response) {
                     return response.send({error: error});
                 }
                 else {
-                    Model.deleteChoreTemplate(choreId, function (error, message) {
+                    Model.deleteAssignedChore(choreId, function (error, message) {
                         if (error) {
                             return response.send({error: error});
                         }

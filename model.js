@@ -209,6 +209,20 @@ function getAssignedChore(choreId, callback) {
             }
         });
 }
+
+function deleteAssignedChore(choreId, callback) {
+    knex('assigned_chore')
+        .where('assigned_chore.id', '=', choreId)
+        .del()
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find assigned chore', null);
+            }
+            else {
+                callback(null, "assigned_chore with id " + choreId + " deleted");
+            }
+        });
+}
 /*
  * Chore template database functionality
  */
@@ -272,6 +286,7 @@ module.exports = {
     getChoreTemplate        : getChoreTemplate,
     deleteChoreTemplate     : deleteChoreTemplate,
     getAssignedChore        : getAssignedChore,
+    deleteAssignedChore     : deleteAssignedChore,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
