@@ -185,8 +185,8 @@ router.get('/chores', function(request, response) {
 });
 
 
-// Function to create chores
-router.post('/chores', function(req, res, next) {
+// Function to create chore templates
+router.post('/chore-template', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect(307, '/');
     }
@@ -200,24 +200,6 @@ router.post('/chores', function(req, res, next) {
             }
 
         }
-        // // Check child assigned (owner) exists
-        // Model.grabChildCredentials(choreToCreate['owner'], function (error, data) {
-        //     if (error) {
-        //         return res.json({"error": error});
-        //     }
-        // });
-        // Check parent has child with id == owner
-        // Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
-        //     if (error) {
-        //         return res.json({"error": error});
-        //     }
-        //     else {
-        //         if (!data.includes(parseInt(choreToCreate['owner']))) {
-        //             return res.json({"error": "Child assigned to chore does not belong to parent"});
-        //         }
-        //     }
-        // });
-
 
         var choreTemplate = new Model.ChoreTemplate({
             owner       : choreToCreate.owner,
@@ -229,6 +211,56 @@ router.post('/chores', function(req, res, next) {
         choreTemplate.save({}, {method: 'insert'}).then(function(model) {
 
             res.json(choreTemplate);
+        });
+    }
+});
+
+
+// Function to create chores
+router.post('/chores', function(req, res, next) {
+    if (!req.isAuthenticated()) {
+        res.redirect(307, '/');
+    }
+    else {
+        var jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
+
+        var choreToCreate = req.body;
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!choreToCreate.hasOwnProperty(jsonKeys[i])) {
+                return res.json({"error": "Missing parameter in assigned chore"});
+            }
+
+        }
+        // Check child assigned (owner) exists
+        Model.grabChildCredentials(choreToCreate['owner'], function (error, data) {
+            if (error) {
+                return res.json({"error": error});
+            }
+        });
+        // Check parent has child with id == owner
+        Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
+            if (error) {
+                return res.json({"error": error});
+            }
+            else {
+                if (!data.includes(parseInt(choreToCreate['owner']))) {
+                    return res.json({"error": "Child assigned to chore does not belong to parent"});
+                }
+            }
+        });
+
+
+        var assignedChore = new Model.AssignedChore({
+            owner       : choreToCreate.owner,
+            name        : choreToCreate.name,
+            description : choreToCreate.description,
+            value       : choreToCreate.value,
+            status      : choreToCreate.status
+        });
+
+        assignedChore.save({}, {method: 'insert'}).then(function(model) {
+
+            res.json(assignedChore);
         });
     }
 });

@@ -18,7 +18,7 @@
         <li ng-repeat="item in models.lists.Unassigned"
           dnd-draggable="item"
           dnd-selected="choreClicked(item, $index, 'Unassigned')"
-          dnd-copied="copiedCallback()"
+          dnd-linked="linkedCallback(item)"
           dnd-effect-allowed="link"
           class="unassigned">
           {{item.name}}
@@ -119,7 +119,7 @@
       </div>
       <div class="modal-footer">
         <section>
-          <button id="js-trigger-overlay" ng-click="addChore()" type="button">Done</button>
+          <button id="js-trigger-overlay" ng-click="addChoreTemplate()" type="button">Done</button>
         </section>
         <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
       </div>
@@ -157,7 +157,10 @@
 
 
 <script>
+var children = [];
+var childrenNames = [];
 var app = angular.module("parentView", ['dndLists']);
+
 app.controller("parentViewCtrl", function($scope, $http) {
 
   $http.get('chores').
@@ -168,25 +171,51 @@ app.controller("parentViewCtrl", function($scope, $http) {
       console.log("Error accessing chores endpoint");
   });
 
-  $scope.copiedCallback = function() {
-    // Remove duplicates in list of unassigned chores so they can't be dragged
-    // back onto the list
-    var unassigned = $scope.models.lists.Unassigned;
-    var arr = {};
-    for ( var i=0, len=unassigned.length; i < len; i++ ) {
-        arr[unassigned[i]['id']] = unassigned[i];
-    }
-    unassigned = new Array();
-    for ( var key in arr ) {
-        unassigned.push(arr[key]);
-    }
+  $http.get('children').
+    success(function(response) {
+      children = response["children"];
+      for (var i = 0; i < children.length; i++) {
+        childrenNames.push(children[i]["name"]);
+      }
+    }).
+    error(function(error) {
+      console.log("Error accessing chores endpoint");
+  });
 
-    // Update list of unassigned chores
-    $scope.models.lists.Unassigned = unassigned;
+  $scope.linkedCallback = function(item) {
+    // Find out who the chore was assigned to using the ID
+    var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
+    var assigneeId = getChildId(assigneeName);
+
+    // Insert new chore into database
+    var newChore =
+    {
+      "parentId": 1,
+      "owner": parseInt(assigneeId),
+      "name": item['name'],
+      "description": item['description'],
+      "value": parseInt(item['value']) || 0,
+      "status": "assigned"
+    };
+
+    // Add new chore to database
+    $http.post("chores", newChore).success(function(chore) {
+      console.log("Successfully assigned chore");
+
+      // Update ID to reflect database
+      var chores = $scope.models.lists[assigneeName];
+      for (var i in chores) {
+        if (chores[i]["id"] == item["id"]) {
+          $scope.models.lists[assigneeName][i]["id"] = chore["id"];
+        }
+      }
+    }).error(function(error) {
+      console.log("Failed to add chore");
+    });  
   };
 
-  $scope.addChore = function() {
-    var newChore =
+  $scope.addChoreTemplate = function() {
+    var newChoreTemplate =
     {
       "owner": 1,
       "name": $('#add-chore-title').val(),
@@ -195,12 +224,12 @@ app.controller("parentViewCtrl", function($scope, $http) {
     };
     $('#add-chore-modal').modal('hide');
 
-    // Add new chore to database
-    $http.post("chores", newChore).success(function(chore) {
-        // Add new chore to list of chore templates
+    // Insert new chore template into database
+    $http.post("chore-template", newChoreTemplate).success(function(chore) {
+        // Add new chore template to list of chore templates
         $scope.models.lists.Unassigned.push(chore);
     }).error(function(error) {
-        console.log("Failed to add chore");
+        console.log("Failed to add chore template");
     });
   };
 
@@ -310,6 +339,27 @@ $('#chore-modal').on('show.bs.modal', function () {
     $('#add-chore-title').focus();
   }, 0);
 });
+
+function getChildId(childName) {
+  for (var i = 0; i < children.length; i++) {
+    if (children[i]["name"] == childName) {
+      return children[i]["id"];
+    }
+  }
+}
+
+function findAssignee(lists, id, children) {
+  for (var index in children) {
+    var child = children[index];
+    var list = lists[child];
+    for (var i = 0; i < list.length; i++) {
+      var chore = list[i];
+      if (chore['id'] == id) {
+        return child;
+      }
+    }
+  }
+}
 
 function removeOptions(selectbox)
 {
