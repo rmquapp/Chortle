@@ -133,21 +133,83 @@ router.post('/addChild', function(req, res, next) {
 // Get the chores from the assigned_chore table associated to a parent
 router.get('/chores', function(request, response) {
     if (request.isAuthenticated()) {
-        Model.getAssignedChoresParent(1, function (error, data) {
-            if (error) {
-                response.send({error: error});
-            }
-            else {
-                if (data) {
-                    response.send(data);
+        var choresJson = {};
+
+        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
+            client.query('SELECT ac.id , ac.name chore_name, ac.description, ac.value, ac.status, ch.name ' +
+                'FROM assigned_chore ac LEFT OUTER JOIN child ch ' +
+                'ON (ac.owner = ch.id) WHERE ch.p_id = 1', function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
                 }
-            }
+                else {
+                    for (var i = 0; i  < result.rows.length; i++) {
+                        var currentChore = result.rows[i];
+                        if (choresJson[currentChore["name"]] == undefined) {
+                            choresJson[currentChore["name"]] = [];
+                        }
+                        choresJson[currentChore["name"]].push(
+                            {
+                                "id": currentChore["id"],
+                                "name": currentChore["chore_name"],
+                                "description": currentChore["description"],
+                                "value": currentChore["value"],
+                                "status": currentChore["status"],
+                            });
+                    }
+                }
+            })
+
+            // Get chore templates
+            choresJson["Unassigned"] = [];
+            client.query('SELECT ct.id, ct.name, ct.description, ct.value ' +
+                'FROM chore_template ct LEFT OUTER JOIN parent p ' +
+                'ON (ct.owner = p.id) WHERE p.id = 1', function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                }
+                else {
+                    for (var i = 0; i  < result.rows.length; i++) {
+                        var currentChore = result.rows[i];
+                        choresJson["Unassigned"].push(
+                            {
+                                "id": currentChore["id"],
+                                "name": currentChore["name"],
+                                "description": currentChore["description"],
+                                "value": currentChore["value"],
+                            });
+                    }
+                }
+            })
+
+            // Ensure that there are lists for all children
+            // Otherwise the drag-and-drop effect won't work
+            var lists = [];
+            client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
+                done();
+                if (err) {
+                    console.error(err);
+                }
+                else {
+                    for (var i = 0; i  < result.rows.length; i++) {
+                        var listname = result.rows[i]["name"]
+                        lists.push(result.rows[i]["name"]);
+                        if (!(listname in choresJson)) {
+                            choresJson[listname] = [];
+                        }
+                    }
+
+                    // Send to controller
+                    response.send({selected: null, lists: choresJson});
+                }
+            });
         });
     } else {
         response.send({error: 'User not logged in'});
     }
 });
-
 
 // Function to create chore templates
 router.post('/chore-template', function(req, res, next) {
@@ -164,7 +226,6 @@ router.post('/chore-template', function(req, res, next) {
             }
 
         }
-
         var choreTemplate = new Model.ChoreTemplate({
             owner       : choreToCreate.owner,
             name        : choreToCreate.name,
@@ -173,7 +234,6 @@ router.post('/chore-template', function(req, res, next) {
         });
 
         choreTemplate.save({}, {method: 'insert'}).then(function(model) {
-
             res.json(choreTemplate);
         });
     }

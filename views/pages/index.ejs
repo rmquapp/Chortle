@@ -9,7 +9,6 @@
 
 <body ng-app="parentView" ng-controller="parentViewCtrl">
 <% include ../partials/nav.ejs %>
-<% include ../partials/addChild.ejs %>
 
 <div class="parent-view-container">
     <div class="chore-list">
@@ -220,8 +219,8 @@ app.controller("parentViewCtrl", function($scope, $http) {
     {
       "owner": 1,
       "name": $('#add-chore-title').val(),
-      "description": $('#chore-description').val(),
-      "value": parseInt($('#chore-value').val()) || 0
+      "description": $('#add-chore-description').val(),
+      "value": parseInt($('#add-chore-value').val()) || 0
     };
     $('#add-chore-modal').modal('hide');
 
