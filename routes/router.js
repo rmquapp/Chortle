@@ -219,7 +219,8 @@ router.get('/chores', function(request, response) {
     }
 });
 
-// Function to create chore templates
+// Keeping this in case is being used by the front end
+// router.post('/chore_template') should be used instead to conform with naming convention for chore_template resource
 router.post('/chore-template', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect(307, '/');
@@ -418,6 +419,280 @@ router.delete('/chore_template/:id', function (request, response) {
         }
     }
 });
+
+/**
+ *
+ * Assigned chores endpoints
+ */
+
+/*
+ * Via GET https://chortle-seng513.herokuapp.com/parent/assigned_chore
+ *
+ * It requires user of type parent authenticated
+ * It returns all the assigned_chores entries found for children of parent
+ * in an array following this format:
+ *  {
+ *      id: 2, (id of the chore_template
+ *      owner: 2 (parent.id of chore template
+ *      name: "Name of the chore template",
+ *      description: "Description of this chore template",
+ *      value: 20 (monetary value of this chore)
+ *  }
+ */
+router.get('/parent/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let parentId = request.user.local.id;
+        Model.getAssignedChoresParent(parentId, function (error, data) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (data) {
+                    response.send(data);
+                }
+            }
+        });
+    }
+});
+
+/*
+ * Via GET https://chortle-seng513.herokuapp.com/child/assigned_chore
+ *
+ * It requires user of type child authenticated
+ * It returns all the assigned_chores entries found for child
+ *  {
+ *      id: 2, (id of the chore_template
+ *      owner: 2 (parent.id of chore template
+ *      name: "Name of the chore template",
+ *      description: "Description of this chore template",
+ *      value: 20 (monetary value of this chore)
+ *  }
+ */
+router.get('/child/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let childId = request.user.local.id;
+        Model.getAssignedChoreChild(childId, function (error, data) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (data) {
+                    response.send(data);
+                }
+            }
+        });
+    }
+});
+
+/*
+ * Via POST https://chortle-seng513.herokuapp.com/assigned_chore
+ * Requires parent authenticated and a form with the following:
+ * {
+ *  name: "Name of chore template",
+ *  owner: 2 (id of the child assigned)
+ *  description: "Description of this chore template",
+ *  value: 20
+ *  status: 'assigned'
+ * }
+ * It returns a json object with the assigned_chore that was just created
+ */
+router.post('/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['name', 'owner', 'description', 'value'];
+        let parentId = request.user.local.id;
+
+        // Ensure name, description and value are present in the form received
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+        // Ensure child belongs to parent
+        let childId = request.body.owner;
+        Model.grabChildrenFromParent(parentId, function (error, children) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                let childFound = false;
+
+                for ( var i=0; i < children.length; i++) {
+                    if(childId === children[i].id) {
+                        childFound = true;
+                        return;
+                    }
+                }
+                if (childFound) {
+
+                    // Create new assigned_chore object
+                    var assignedChore = new Model.AssignedChore({
+                        owner : request.body.owner,
+                        name  : request.body.name,
+                        description : request.body.description,
+                        value : request.body.value,
+                        status: request.body.status,
+                    });
+
+                    assignedChore.save({}, {method: 'insert'}).then ( function (model) {
+                        response.json(model);
+                    });
+                }
+                else {
+                    return response.send({error: ERROR.NOT_AUTHORIZED});
+                }
+
+            }
+
+        });
+
+    }
+});
+
+/*
+ * Via PUT https://chortle-seng513.herokuapp.com/assigned_chore
+ * Requires parent authenticated and a form with the following:
+ * {
+ *  id : 2 (id of the assigned_chore)
+ *  owner: 3 (child id that the chore_template is assigned to)
+ *  name : "Name of chore template",
+ *  description : "Description of this chore template",
+ *  value : 20
+ *  status: 'assigned'
+ * }
+ * It returns a json object with the chore_template that was updated
+ */
+router.put('/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['id', 'owner', 'name', 'description', 'value', 'status'];
+        // Ensure id, name, description and value are present in the form received
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+
+        // Obtain assigned_chore from db, ensure it exists
+        Model.getAssignedChore(request.body.id, function (error, oldAssignedChore) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                // Create new chore_template object
+                var assignedChore = new Model.AssignedChore({
+                    id          : request.body.id,
+                    owner       : request.body.owner,
+                    name        : request.body.name,
+                    description : request.body.description,
+                    value       : request.body.value,
+                    status      : request.body.status,
+                });
+
+                assignedChore.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
+    }
+});
+
+/*
+ * Via PUT https://chortle-seng513.herokuapp.com/child/assigned_chore
+ * Requires child authenticated and a form with the following:
+ * {
+ *  id : 2 (id of the assigned_chore)
+ *  name : "Name of chore template",
+ *  description : "Description of this chore template",
+ *  value : 20
+ *  status: 'assigned'
+ * }
+ * It returns a json object with the chore_template that was updated
+ */
+router.put('/child/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['id', 'name', 'description', 'value', 'status'];
+        let childId = request.user.local.id;
+        // Ensure id, name, description and value are present in the form received
+        for (var i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+
+        // Obtain assigned_chore from db, ensure it exists
+        Model.getAssignedChore(request.body.id, function (error, oldAssignedChore) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                // Create new chore_template object
+                var assignedChore = new Model.AssignedChore({
+                    id          : request.body.id,
+                    owner       : childId,
+                    name        : request.body.name,
+                    description : request.body.description,
+                    value       : request.body.value,
+                    status      : request.body.status,
+                });
+
+                assignedChore.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
+    }
+});
+
+/*
+ * Via DELETE https://chortle-seng513.herokuapp.com/assigned_chore/:id
+ * Requires parent authenticated. It will only delete assigned_chore entries that belong to children of the parent
+ * It returns a json object with the message
+ */
+router.delete('/assigned_chore', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let choreId = request.params.id;
+        let role = request.user.local.role;
+        if (choreId && role === 'parent') {
+            Model.getAssignedChore(choreId, function (error, oldChoreTemplate) {
+                if (error) {
+                    return response.send({error: error});
+                }
+                else {
+                    Model.deleteChoreTemplate(choreId, function (error, message) {
+                        if (error) {
+                            return response.send({error: error});
+                        }
+                        else {
+                            response.send({delete_chore_template: message});
+                        }
+                    });
+                }
+            });
+        }
+        else {
+            return response.send({error: ERROR.NOT_AUTHORIZED});
+        }
+    }
+});
+
+
 // Function to create chores
 router.post('/chores', function(req, res, next) {
     if (!req.isAuthenticated()) {

@@ -56,7 +56,8 @@ function grabParentCredentials(userId, callback) {
         local: {
             username: null,
             password: null,
-            id:       null
+            id:       null,
+            role:     null,
         },
     };
 
@@ -74,6 +75,7 @@ function grabParentCredentials(userId, callback) {
             loginParent.local.username      = row.username;
             loginParent.local.password      = row.password;
             loginParent.local.id            = row.id;
+            loginParent.local.id            = 'parent';
 
             callback(null, loginParent);
         }
@@ -92,7 +94,9 @@ function grabChildCredentials(childId, callback) {
     var loginChild = {
         local: {
             username: null,
-            password: null
+            password: null,
+            id      : null,
+            role    : null,
         }
     };
 
@@ -105,8 +109,10 @@ function grabChildCredentials(childId, callback) {
            callback('Could not find child user with that ID', null);
        }
        else {
-           loginChild.local.username = row.username;
-           loginChild.local.password = row.password;
+           loginChild.local.username    = row.username;
+           loginChild.local.password    = row.password;
+           loginChild.local.id          = row.id;
+           loginChild.local.parent      = 'child';
            callback(null, loginChild);
        }
     });
@@ -143,9 +149,12 @@ function grabChildrenFromParent(parentId, callback) {
             }
     })
 }
+/*
+ * Assigned chore database functionality
+ */
 
-// Given the child Id, obtain all the chores assigned to it
-function getAllAssignedChores(childId, callback) {
+// Given a child Id, obtain all the chores assigned to it
+function getAssignedChoreChild(childId, callback) {
     var assignedChores = [];
 
     knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value', 'assigned_chore.status')
@@ -163,6 +172,7 @@ function getAllAssignedChores(childId, callback) {
     });
 }
 
+// given a parent id, obtain all the chores from children
 function getAssignedChoresParent(parentId, callback) {
     var assignedChores = [];
 
@@ -182,8 +192,27 @@ function getAssignedChoresParent(parentId, callback) {
     });
 }
 
+// given a chore id, obtain all the chores from children
+function getAssignedChore(choreId, callback) {
+    var assignedChores = [];
+
+    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value',
+        'assigned_chore.status', 'child.name as child_name')
+        .from('assigned_chore')
+        .where('assigned_chore.id', '=', choreId)
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find assigned chores', null);
+            }
+            else {
+                callback(null, row[0]);
+            }
+        });
+}
+/*
+ * Chore template database functionality
+ */
 function getChoreTemplateParent(parentId, callback) {
-    var choreTemplate = [];
 
     knex.select('chore_template.id', 'chore_template.owner', 'chore_template.name', 'chore_template.description',
         'chore_template.value')
@@ -200,7 +229,6 @@ function getChoreTemplateParent(parentId, callback) {
 }
 
 function getChoreTemplate(choreId, callback) {
-    var choreTemplate = null;
 
     knex.select('chore_template.id', 'chore_template.owner', 'chore_template.name', 'chore_template.description',
         'chore_template.value')
@@ -238,11 +266,12 @@ module.exports = {
     createNewAssignedChore  : createNewAssignedChore,
     createNewChoreTemplate  : createNewChoreTemplate,
     grabChildrenFromParent  : grabChildrenFromParent,
-    getAllAssignedChores    : getAllAssignedChores,
     getAssignedChoresParent : getAssignedChoresParent,
+    getAssignedChoreChild   : getAssignedChoreChild,
     getChoreTemplateParent  : getChoreTemplateParent,
     getChoreTemplate        : getChoreTemplate,
     deleteChoreTemplate     : deleteChoreTemplate,
+    getAssignedChore        : getAssignedChore,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
