@@ -75,7 +75,7 @@ function grabParentCredentials(userId, callback) {
             loginParent.local.username      = row.username;
             loginParent.local.password      = row.password;
             loginParent.local.id            = row.id;
-            loginParent.local.id            = 'parent';
+            loginParent.local.role           = 'parent';
 
             callback(null, loginParent);
         }
@@ -161,7 +161,7 @@ function getAssignedChoreChild(childId, callback) {
         .from('assigned_chore')
         .where('assigned_chore.owner', '=', childId). then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not assigned chores for child', null);
+                callback('Could not find assigned chores for child', null);
             }
             else {
                 for (var i = 0; i < row.length; i++) {
@@ -175,10 +175,10 @@ function getAssignedChoreChild(childId, callback) {
 // given a parent id, obtain all the chores from children
 function getAssignedChoresParent(parentId, callback) {
     var assignedChores = [];
-
-    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value',
-        'assigned_chore.status', 'child.name as child_name')
-        .from('assigned_chore').leftOuterJoin('child', 'child.p_id', parentId)
+    knex.select('assigned_chore.id', 'assigned_chore.name as chore_name', 'assigned_chore.description', 'assigned_chore.value',
+        'assigned_chore.status', 'child.name')
+        .from('assigned_chore').leftOuterJoin('child', 'child.id', 'assigned_chore.owner')
+        .where('child.p_id', '=', parentId)
         .then ( function (row) {
         if (row.length <= 0) {
             callback('Could not find assigned chores', null);

@@ -98,126 +98,74 @@ router.get('/signout', function(req, res, next) {
     }
 });
 
-// Processing the page for adding a child
-router.post('/addChild', function(req, res, next) {
-  // Here, req.body is { name, username, pwd, pwd-repeat }
-  let child = req.body;
-
-  console.log(child.pwd);
-  console.log(child.pwdRepeat);
-
-  // Make sure password typed correctly
-  if (child.pwd !== child.pwdRepeat) {
-    res.status(500).send({ error: 'password mismatch'});
-    return;
-  }
-
-  // Try and fetch a username to see if it already exists.
-  let usernamePromise = new Model.Child({ username: child.username }).fetch();
-
-  return usernamePromise.then(function(model) {
-    if (model) {
-      res.status(500).send({ error: 'username already exists'});
-    } else {
-      let password = child.pwd;
-      let hash = bcrypt.hashSync(password);
-
-      // Make a new postgres db row of the account
-      let newChild = new Model.Child({
-        name: child.name,
-        username: child.username,
-        p_id: 1,
-        password: hash
-      });
-
-      newChild.save({}, {method: 'insert'}).then(function(model) {
-        // close modal and refresh page
-        res.redirect('/');
-      });
-    }
-  });
-});
 
 // Get the chores from the assigned_chore table associated to a parent
 router.get('/chores', function(request, response) {
-    if (request.isAuthenticated()) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
         var choresJson = {};
+        let parentId = request.user.local.id;
+        //
+        Model.getAssignedChoresParent(parentId, function (error, chores) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
 
-        pg.connect(process.env.DATABASE_URL, function (err, client, done) {
-            client.query('SELECT ac.id , ac.name chore_name, ac.description, ac.value, ac.status, ch.name ' +
-                'FROM assigned_chore ac LEFT OUTER JOIN child ch ' +
-                'ON (ac.owner = ch.id) WHERE ch.p_id = 1', function (err, result) {
-                done();
-                if (err) {
-                    console.error(err);
+                for ( var i = 0; i < chores.assigned_chores.length; i ++) {
+                    var currentChore = chores.assigned_chores[i];
+                    if (choresJson[currentChore["name"]] == undefined) {
+                        choresJson[currentChore["name"]] = [];
+                    }
+                    choresJson[currentChore["name"]].push(
+                        {
+                            "id": currentChore["id"],
+                            "name": currentChore["chore_name"],
+                            "description": currentChore["description"],
+                            "value": currentChore["value"],
+                            "status": currentChore["status"],
+                        });
                 }
-                else {
-                    for (var i = 0; i  < result.rows.length; i++) {
-                        var currentChore = result.rows[i];
-                        if (choresJson[currentChore["name"]] == undefined) {
-                            choresJson[currentChore["name"]] = [];
+                // Get chores template
+                Model.getChoreTemplateParent(parentId, function (error, choresTemplate) {
+                    if (error) {
+                        return response.send({error: error});
+                    }
+                    else {
+                        choresJson["Unassigned"] = [];
+                        for (var i = 0; i < choresTemplate.chore_template.length; i++) {
+                            choresJson["Unassigned"].push(
+                                {
+                                    id          : choresTemplate.chore_template[i].id,
+                                    name        : choresTemplate.chore_template[i].name,
+                                    description : choresTemplate.chore_template[i].description,
+                                    value       : choresTemplate.chore_template[i].value
+                                });
                         }
-                        choresJson[currentChore["name"]].push(
-                            {
-                                "id": currentChore["id"],
-                                "name": currentChore["chore_name"],
-                                "description": currentChore["description"],
-                                "value": currentChore["value"],
-                                "status": currentChore["status"],
-                            });
+                        Model.grabChildrenFromParent(parentId, function (error, children) {
+                           if (error)  {
+                               return response.send({error: error});
+                           }
+                           else {
+                                for (var i = 0; i < children.length; i++) {
+                                    if (!choresJson.hasOwnProperty(children[i].name)) {
+                                        choresJson[children[i].name] = [];
+                                    }
+                                }
+                                // Send to controller
+                               response.send({selected: null, lists: choresJson});
+                           }
+                        });
                     }
-                }
-            })
-
-            // Get chore templates
-            choresJson["Unassigned"] = [];
-            client.query('SELECT ct.id, ct.name, ct.description, ct.value ' +
-                'FROM chore_template ct LEFT OUTER JOIN parent p ' +
-                'ON (ct.owner = p.id) WHERE p.id = 1', function (err, result) {
-                done();
-                if (err) {
-                    console.error(err);
-                }
-                else {
-                    for (var i = 0; i  < result.rows.length; i++) {
-                        var currentChore = result.rows[i];
-                        choresJson["Unassigned"].push(
-                            {
-                                "id": currentChore["id"],
-                                "name": currentChore["name"],
-                                "description": currentChore["description"],
-                                "value": currentChore["value"],
-                            });
-                    }
-                }
-            })
-
-            // Ensure that there are lists for all children
-            // Otherwise the drag-and-drop effect won't work
-            var lists = [];
-            client.query('SELECT child.name FROM child WHERE child.p_id = 1', function (err, result) {
-                done();
-                if (err) {
-                    console.error(err);
-                }
-                else {
-                    for (var i = 0; i  < result.rows.length; i++) {
-                        var listname = result.rows[i]["name"]
-                        lists.push(result.rows[i]["name"]);
-                        if (!(listname in choresJson)) {
-                            choresJson[listname] = [];
-                        }
-                    }
-
-                    // Send to controller
-                    response.send({selected: null, lists: choresJson});
-                }
-            });
+                });
+            }
         });
-    } else {
-        response.send({error: 'User not logged in'});
     }
 });
+
+
 
 // Keeping this in case is being used by the front end
 // router.post('/chore_template') should be used instead to conform with naming convention for chore_template resource
@@ -507,7 +455,7 @@ router.post('/assigned_chore', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-        let jsonKeys = ['name', 'owner', 'description', 'value'];
+        let jsonKeys = ['name', 'owner', 'description', 'value', 'status'];
         let parentId = request.user.local.id;
 
         // Ensure name, description and value are present in the form received
@@ -662,7 +610,7 @@ router.put('/child/assigned_chore', function (request, response) {
  * Requires parent authenticated. It will only delete assigned_chore entries that belong to children of the parent
  * It returns a json object with the message
  */
-router.delete('/assigned_chore', function (request, response) {
+router.delete('/assigned_chore/:id', function (request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
@@ -680,7 +628,7 @@ router.delete('/assigned_chore', function (request, response) {
                             return response.send({error: error});
                         }
                         else {
-                            response.send({delete_chore_template: message});
+                            response.send({delete_assigned_chore: message});
                         }
                     });
                 }
@@ -689,6 +637,152 @@ router.delete('/assigned_chore', function (request, response) {
         else {
             return response.send({error: ERROR.NOT_AUTHORIZED});
         }
+    }
+});
+
+/*
+ * via POST https://chortle-seng513.herokuapp.com/child/complete_assigned_chore/:id
+ * set assigned_chore to be completed
+ * It requires child user to be logged in
+ */
+router.post('child/complete_assigned_chore/:id', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+/*
+ * via POST https://chortle-seng513.herokuapp.com/parent/approve_assigned_chore/:id
+ * set assigned_chore to be approved
+ * It requires parent user to be logged in
+ */
+router.post('parent/approve_assigned_chore/:id', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+
+/*
+ * Child object endpoints
+ *
+ */
+
+/* via GET https://chortle-seng513.herokuapp.com/child
+ * return the all the child objects associated to parent
+*/
+router.get('/child', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+/*
+ * via POST https://chortle-seng513.herokuapp.com/child
+ * creates a child account and associates this to parent logged in
+ */
+router.post('/child', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        // Here, req.body is { name, username, pwd, pwd-repeat }
+        let child = request.body;
+        let parentId = request.user.local.id;
+
+        // Make sure password typed correctly
+        if (child.pwd !== child.pwdRepeat) {
+            response.status(500).send({ error: 'password mismatch'});
+            return;
+        }
+
+        // Try and fetch a username to see if it already exists.
+        let usernamePromise = new Model.Child({ username: child.username }).fetch();
+
+        return usernamePromise.then(function(model) {
+            if (model) {
+                response.status(500).send({ error: 'username already exists'});
+            } else {
+                let password = child.pwd;
+                let hash = bcrypt.hashSync(password);
+
+                // Make a new postgres db row of the account
+                let newChild = new Model.Child({
+                    name: child.name,
+                    username: child.username,
+                    p_id: parentId,
+                    password: hash
+                });
+
+                newChild.save({}, {method: 'insert'}).then(function(model) {
+                    // close modal and refresh page
+                    response.redirect('/');
+                });
+            }
+        });
+    }
+});
+
+/*
+ * via PUT https://chortle-seng513.herokuapp.com/child
+ * updates a child account associated to parent logged in
+ */
+router.put('/child', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+/*
+ * via DELETE https://chortle-seng513.herokuapp.com/child
+ * deletes a child account associated to parent logged in
+ */
+router.delete('/child', function (request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+/*
+ * via POST https://chortle-seng513.herokuapp.com/child/add_funds
+ * increases the funds of child account
+ * It requires parent user to be logged in
+ */
+router.post('/child/add_funds', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
+    }
+});
+
+/*
+ * via POST https://chortle-seng513.herokuapp.com/child/add_funds
+ * decreases the funds of child account
+ * It requires parent user to be logged in
+ */
+router.post('/child/remove_funds', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+
     }
 });
 

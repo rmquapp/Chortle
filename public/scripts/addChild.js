@@ -4,7 +4,7 @@
 
 function addChild() {
   $.ajax({
-    url: '/addChild',
+    url: '/child',
     type: "POST",
     data: $("#addChildForm").serialize(),
     error: function (response) {
