@@ -155,6 +155,43 @@
   </div>
 </div>
 
+<div id="addChild" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3>Add A Child</h3>
+      </div>
+      <div class="modal-body">
+        <form>
+
+
+            <label><b>Child Name</b></label>
+            <input type="text" placeholder="Enter Child Name" id="child-name" name="name" required>
+
+            <label><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" id="child-username" name="username" required>
+
+            <label><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" id="child-psw" name="psw" required>
+
+            <label><b>Repeat Password</b></label>
+            <input type="password" placeholder="Repeat Password" id="child-psw-repeat" name="psw-repeat" required>
+
+            <p><br></p>
+            <div id="warning"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <section>
+          <button id="js-trigger-overlay" ng-click="addChild()" type="button">Submit</button>
+        </section>
+        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 var children = [];
@@ -231,6 +268,24 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }).error(function(error) {
         console.log("Failed to add chore template");
     });
+  };
+
+  $scope.addChild = function() {
+    var newChild = {
+        "name": $('#child-name').val(),
+        "username": $('#child-username').val(),
+        "pwd": $('#child-psw').val(),
+        "pwdRepeat": $('#child-psw-repeat').val(),
+    };
+
+    $http.post("child", newChild).success(function(child) {
+        $('#addChild').modal('hide');
+        children.push({id: child.id, name: child.name});
+        childrenNames.push(child.name);
+    }).error(function (error) {
+        $('#warning').text(error.error);
+    });
+
   };
 
   $scope.saveChore = function() {
@@ -329,7 +384,20 @@ $(function(){
 
     $('#add-chore-title').focus();
     return false;
-  })
+  });
+
+  $("#add-child").on("click", function () {
+    $("#addChild").modal('show');
+
+    $('#child-name').val("");
+    $('#child-psw').val("");
+    $('#child-psw-repeat').val("");
+    $('#child-username').val("");
+    $('#warning').val("");
+    $('#child-name').focus();
+
+    return false;
+    });
 });
 
 // Doesn't work, help pls

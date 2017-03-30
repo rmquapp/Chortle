@@ -703,10 +703,9 @@ router.post('/child', function(request, response) {
         // Here, req.body is { name, username, pwd, pwd-repeat }
         let child = request.body;
         let parentId = request.user.local.id;
-
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.status(500).send({ error: 'password mismatch'});
+            response.status(500).send({ error: 'Password mismatch'});
             return;
         }
 
@@ -715,7 +714,7 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.status(500).send({ error: 'username already exists'});
+                response.status(500).send({ error: 'Username already exists'});
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
@@ -729,8 +728,8 @@ router.post('/child', function(request, response) {
                 });
 
                 newChild.save({}, {method: 'insert'}).then(function(model) {
-                    // close modal and refresh page
-                    response.redirect('/');
+                    // send child created
+                    response.send(model);
                 });
             }
         });
