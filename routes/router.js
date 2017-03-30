@@ -28,7 +28,6 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        let user = req.user;
         res.render('pages/index');
 
     }
@@ -83,7 +82,7 @@ router.post('/signup', function(req, res, next) {
 
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
-                res.redirect(307, '/signin');
+                res.redirect(307, '/');
             });
         }
     });
@@ -110,30 +109,34 @@ router.get('/chores', function(request, response) {
         //
         Model.getAssignedChoresParent(parentId, function (error, chores) {
             if (error) {
-                return response.send({error: error});
+                console.log(error);
             }
             else {
-
-                for ( var i = 0; i < chores.assigned_chores.length; i ++) {
-                    var currentChore = chores.assigned_chores[i];
-                    if (choresJson[currentChore["name"]] == undefined) {
-                        choresJson[currentChore["name"]] = [];
+                if (chores) {
+                    for ( var i = 0; i < chores.assigned_chores.length; i ++) {
+                        var currentChore = chores.assigned_chores[i];
+                        if (choresJson[currentChore["name"]] == undefined) {
+                            choresJson[currentChore["name"]] = [];
+                        }
+                        choresJson[currentChore["name"]].push(
+                            {
+                                "id": currentChore["id"],
+                                "name": currentChore["chore_name"],
+                                "description": currentChore["description"],
+                                "value": currentChore["value"],
+                                "status": currentChore["status"],
+                            });
                     }
-                    choresJson[currentChore["name"]].push(
-                        {
-                            "id": currentChore["id"],
-                            "name": currentChore["chore_name"],
-                            "description": currentChore["description"],
-                            "value": currentChore["value"],
-                            "status": currentChore["status"],
-                        });
                 }
-                // Get chores template
-                Model.getChoreTemplateParent(parentId, function (error, choresTemplate) {
-                    if (error) {
-                        return response.send({error: error});
-                    }
-                    else {
+            }
+
+            // Get chores template
+            Model.getChoreTemplateParent(parentId, function (error, choresTemplate) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    if(choresTemplate) {
                         choresJson["Unassigned"] = [];
                         for (var i = 0; i < choresTemplate.chore_template.length; i++) {
                             choresJson["Unassigned"].push(
@@ -144,23 +147,25 @@ router.get('/chores', function(request, response) {
                                     value       : choresTemplate.chore_template[i].value
                                 });
                         }
-                        Model.grabChildrenFromParent(parentId, function (error, children) {
-                           if (error)  {
-                               return response.send({error: error});
-                           }
-                           else {
-                                for (var i = 0; i < children.length; i++) {
-                                    if (!choresJson.hasOwnProperty(children[i].name)) {
-                                        choresJson[children[i].name] = [];
-                                    }
-                                }
-                                // Send to controller
-                               response.send({selected: null, lists: choresJson});
-                           }
-                        });
                     }
+                }
+                Model.grabChildrenFromParent(parentId, function (error, children) {
+                    if (error)  {
+                        console.log(error);
+                    }
+                    else {
+                        for (var i = 0; i < children.length; i++) {
+                            if (!choresJson.hasOwnProperty(children[i].name)) {
+                                choresJson[children[i].name] = [];
+                            }
+                        }
+                    }
+                    // Send to controller
+                    response.send({selected: null, lists: choresJson});
+
                 });
-            }
+
+            });
         });
     }
 });
