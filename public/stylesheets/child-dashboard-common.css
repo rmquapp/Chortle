@@ -1,0 +1,193 @@
+html, body{
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.chortle-navbar{
+    background-color: #d8f090;
+}
+
+.chortle-nav-icon{
+    color: #95B82c;
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: 24pt;
+    pointer-events: none;
+}
+
+/* Dropdown button on hover & focus */
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #c0e74d;
+}
+
+.child-view-footer{
+    background-color: #ffd3d3;
+    height: 50px;
+    width: 100%;
+    margin-top: auto;
+}
+
+.child-view-container{
+    display: -webkit-flex;
+    display:flex;
+    width: 100%;
+    flex-direction:row;
+    height: 100%;
+    overflow-y: auto;
+}
+.chore-detail-container{
+    width:30%;
+    min-width: 400px;
+    margin: 20px;
+    margin-right: auto;
+}
+
+.chore-title{
+    margin-top: 40px;
+    padding-left: 20px;
+    color: #0FA0CE;
+    border-color: #003434;
+    font-weight: bold;
+    border-bottom: solid;
+    border-width: 1px;
+}
+
+.approval-balance-container{
+    margin-left: 20px;
+    min-width: 300px;
+    width: 30%;
+}
+
+.approval-container{
+    height: 40%;
+    width: 100%;
+    min-height: 200px;
+    margin-top: 10%;
+    background-color: #ffeac0;
+}
+
+.balance-container{
+    height: 40%;
+    width: 100%;
+    min-height: 200px;
+    margin-bottom: 10%;
+    background-color: #ffd3d3;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+}
+
+.chore-approval-label{
+    width:100%;
+    color: #f28500;
+    text-align: center;
+    font-weight: bold;
+}
+
+.piggybank-balance-label{
+    width:100%;
+    color: #ff7171;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.chore-description{
+    text-align: end;
+}
+
+.chore-list{
+    background-color: #e2fbfa;
+    height: 100%;
+}
+
+.add-chore {
+    background-color: #bbbbbb;
+    display: block;
+    padding: 6px 15px;
+    margin-top: 10px;
+    margin-bottom: 24px;
+    margin-right: 10px;
+    margin-left: 10px;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.unassigned li {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.piggy-bank-balance {
+    background-image: url('/images/piggy-bank.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 100px;
+    min-height: 100px;
+    width: 100px;
+    min-width: 100px;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+}
+
+.kids-chores{
+    width: 100%;
+    margin-top: 5px;
+}
+
+.bank-amount{
+    flex: 1;
+    margin-top: 25px;
+    font-weight: bold;
+    color: #d8f090;
+    text-align: center;
+    font-size: 20pt;
+}
+
+.chore-value-row{
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: row-reverse;
+    align-content: right;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.chore-label{
+    color: #0FA0CE;
+    text-align: end;
+    font-weight: bold;
+    min-width: 140px;
+}
+
+.chore-row-value{
+    margin-left:auto;
+    text-align: center;
+    min-width: 100px;
+}
+
+.chore-value{
+    font-size: 20pt;
+    color: #555555;
+}
+
+.complete-checkbox{
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+    font-size: 100pt;
+}
+
+.chore-status-value{
+    color: green;
+    font-weight: bold;
+}

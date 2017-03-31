@@ -858,5 +858,8 @@ router.get('/children', function(request, response) {
 
 });
 
+router.get('/images/piggy-bank.png', function(request, response) {
+    response.render('images/piggy-bank.png')
+});
 
 module.exports = router;
