@@ -62,7 +62,6 @@ html, body{
 }
 
 .approval-container{
-    height: 40%;
     width: 100%;
     min-height: 200px;
     margin-top: 10%;
@@ -70,7 +69,6 @@ html, body{
 }
 
 .balance-container{
-    height: 40%;
     width: 100%;
     min-height: 200px;
     margin-bottom: 10%;
@@ -190,4 +188,51 @@ html, body{
 .chore-status-value{
     color: green;
     font-weight: bold;
+}
+
+.chore-list ul[dnd-list] li {
+    background-color: #CAF4F2;
+    color: #78b0ae;
+}
+
+.chore-list ul[dnd-list] li.selected {
+    background-color: #96DDDA;
+    color: #56A7A4;
+}
+
+.chore-approval-inner{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.chore-approval-list-container{
+    min-width: 220px;
+}
+
+.chore-approval-list{
+}
+
+.chore-approval-list li {
+    color: #f28500;
+    margin: 5px;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+}
+
+.img-confetti{
+    padding-right: 10px;
+}
+
+.approval-chore-amount{
+    float: left;
+    font-weight: bold;
+    min-width: 70px;
+    text-align: right;
+    padding-right:10px;
+}
+
+.approval-chore-name{
 }

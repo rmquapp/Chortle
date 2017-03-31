@@ -2,24 +2,24 @@
 <html>
 <head>
   <% include ../partials/header.ejs %>
+  <script src="/scripts/childDashboard.js"></script>
   <link rel="stylesheet" type="text/css" href="/stylesheets/child-dashboard-common.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="/stylesheets/child-dashboard-small.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (min-width: 501px)" href="/stylesheets/child-dashboard-large.css"/>
 </head>
 
-<body ng-app="childView" ng-controller="childViewCtrl">
+<body ng-app="childDashboard" ng-controller="childDashboardCtrl">
 <% include ../partials/nav.ejs %>
 
 <div class="child-view-container">
     <div class="chore-list">
-      <ul dnd-list="models.lists.Unassigned" class="unassigned"
-      dnd-effect-allowed="copy">
-        <li ng-repeat="item in models.lists.Unassigned"
-          dnd-draggable="item"
-          dnd-selected="choreClicked(item, $index, 'Unassigned')"
-          dnd-copied="copiedCallback()"
-          dnd-effect-allowed="link"
-          class="unassigned">
+      <ul dnd-list="models.choreList" class="unassigned"
+          dnd-effect-allowed="copy">
+        <li ng-repeat="item in models.choreList"
+            dnd-draggable="none"
+            dnd-disable-if ="true"
+            dnd-selected="models.selected = item"
+            ng-class="{selected: models.selected === item}">
           {{item.name}}
         </li>
       </ul>
@@ -54,7 +54,30 @@
     </div>
   </div><!-- chore-detail-container -->
   <div class="approval-balance-container">
-    <div class="approval-container"><div class="chore-approval-label">Chores Waiting for Approval</div></div> <!-- approval-container -->
+    <div class="approval-container">
+      <div class="chore-approval-label">Chores Waiting for Approval</div>
+      <div class="chore-approval-inner">
+        <div class="chore-approval-list-container">
+          <ul class="list-unstyled chore-approval-list">
+            <li>
+              <div class="approval-chore-amount">$10</div>
+              <div class="approval-chore-name">Chore 1 Is a longer chore with a longer name, i dunno why?</div>
+            </li>
+            <li>
+              <span class="approval-chore-amount">$15</span>
+              <span class="approval-chore-name">Chore 2</span>
+            </li>
+            <li>
+              <span class="approval-chore-amount">$5</span>
+              <span class="approval-chore-name">Chore 3</span>
+            </li>
+          </ul>
+        </div><!-- chore-approval-list-container -->
+        <div class="confetti-picture">
+          <img class="img-responsive img-confetti" src="\images\confetti.gif">
+        </div>
+      </div><!-- chore-approval-inner -->
+    </div> <!-- approval-container -->
     <div class="balance-container">
       <div class="piggybank-balance-label">Piggy Bank Balance</div>
       <div class="piggy-bank-balance"><div class="bank-amount">$48</div></div>
@@ -63,224 +86,5 @@
 
 </div> <!-- child-view-container -->
 <div class="child-view-footer"></div>
-
-<div id="add-chore-modal" class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <input type="text" id="add-chore-title" class="chore-title" placeholder="Enter Chore Title"/>
-      </div>
-      <div class="modal-body">
-        <label for="add-chore-description">Description</label>
-        <textarea id="add-chore-description" name="description" rows="4"></textarea>
-        <div class="input-group">
-          <span class="input-group-addon">$</span>
-          <input id="add-chore-value" type="number" step="any" class="form-control" placeholder="Value"/>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <section>
-          <button id="js-trigger-overlay" ng-click="addChore()" type="button">Done</button>
-        </section>
-        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div id="edit-chore-modal" class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <input type="text" id="edit-chore-title" class="chore-title" placeholder="Enter Chore Title"/>
-      </div>
-      <div class="modal-body">
-        <label for="edit-chore-description" class="description-label">Description</label>
-        <textarea id="edit-chore-description" name="description" rows="4"></textarea>
-        <div class="input-group">
-          <span class="input-group-addon">$</span>
-          <input id="edit-chore-value" type="number" step="any" class="form-control" placeholder="Value"/>
-        </div>
-        </br>
-        <select id="selectChild">
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button id="delete-button" ng-click="deleteChore()" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
-        <section>
-          <button id="js-trigger-overlay" ng-click="saveChore()" type="button">Save</button>
-        </section>
-        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<script>
-var app = angular.module("parentView", ['dndLists']);
-app.controller("parentViewCtrl", function($scope, $http) {
-
-  $http.get('chores').
-    success(function(data, status, headers, config) {
-      $scope.models = data;
-    }).
-    error(function(data, status, headers, config) {
-      console.log("Error accessing chores endpoint");
-  });
-
-  $scope.copiedCallback = function() {
-    // Remove duplicates in list of unassigned chores so they can't be dragged
-    // back onto the list
-    var unassigned = $scope.models.lists.Unassigned;
-    var arr = {};
-    for ( var i=0, len=unassigned.length; i < len; i++ ) {
-        arr[unassigned[i]['id']] = unassigned[i];
-    }
-    unassigned = new Array();
-    for ( var key in arr ) {
-        unassigned.push(arr[key]);
-    }
-
-    // Update list of unassigned chores
-    $scope.models.lists.Unassigned = unassigned;
-  };
-
-  $scope.addChore = function() {
-    var newChore =
-    {
-      "owner": 1,
-      "name": $('#add-chore-title').val(),
-      "description": $('#chore-description').val(),
-      "value": parseInt($('#chore-value').val()) || 0
-    };
-    $('#add-chore-modal').modal('hide');
-
-    // Add new chore to database
-    $http.post("chores", newChore).success(function(chore) {
-        // Add new chore to list of chore templates
-        $scope.models.lists.Unassigned.push(chore);
-    }).error(function(error) {
-        console.log("Failed to add chore");
-    });
-  };
-
-  $scope.saveChore = function() {
-    var editedChore =
-    {
-      "owner": 1,
-      "name": $('#edit-chore-title').val(),
-      "description": $('#edit-chore-description').val(),
-      "value": parseInt($('#edit-chore-value').val()) || 0
-    }
-
-    var lists = $scope.models.lists;
-    var assignee = $scope.models.selected[1] || "Unassigned";
-    var item = $scope.models.selected[0];
-
-    var list = lists[assignee];
-    for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
-        var newAssignee = $('#selectChild').val() || "Unassigned";
-
-        // If the assignee has not been changed, update the chore
-        if (assignee == newAssignee) {
-          $scope.models.lists[assignee][i] = editedChore;
-          $('#edit-chore-modal').modal('hide');
-        }
-
-        // If the assignee has changed, move the updated chore
-        else {
-          if (assignee != "Unassigned") {
-            $scope.models.lists[assignee].splice(i, 1);
-          }
-          $scope.models.lists[newAssignee].push(editedChore);
-        }
-        break;
-      }
-    }
-    $('#edit-chore-modal').modal('hide');
-  }
-
-  $scope.choreClicked = function(item, index, assignee) {
-    $('#edit-chore-modal').modal('show');
-
-    $('#edit-chore-title').val(item['name']);
-    $('#edit-chore-description').val(item['description']);
-    $('#edit-chore-value').val(item['value']);
-
-    if (assignee == "Unassigned") {
-      assignee = "";
-    }
-    $scope.models.selected = [item, assignee];
-
-    // Remove old select options
-    removeOptions(document.getElementById('selectChild'));
-
-    // Populate select input for assigning a chore to a child
-    var children = ["Ruby", "Dexter", "Toulouse"];
-    var index = children.indexOf(assignee);
-    if (index > -1) {
-      children.splice(index, 1);
-    }
-
-    children.unshift(assignee);
-
-    var select = document.getElementById('selectChild');
-    for (var i = 0; i < children.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = children[i];
-        opt.innerHTML = "&nbsp&nbsp" + children[i] + "&nbsp&nbsp&nbsp&nbsp&nbsp";
-        select.appendChild(opt);
-    }
-  }
-
-  $scope.deleteChore = function() {
-    var lists = $scope.models.lists;   
-    var assignee = $scope.models.selected[1] || "Unassigned";
-    var item = $scope.models.selected[0];
-
-    var list = lists[assignee];
-    for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
-        $scope.models.lists[assignee].splice(i, 1);
-        break;
-      }
-    }
-    $('#edit-chore-modal').modal('hide');
-  }
-});
-
-$(function(){
-  $("#add").on("click",function() {
-    $('#add-chore-modal').modal('show');
-
-    $('#add-chore-title').val("");
-    $('#add-chore-description').val(null);
-    $('#add-chore-value').val(null);
-
-    $('#add-chore-title').focus();
-    return false;
-  })
-});
-
-// Doesn't work, help pls
-$('#chore-modal').on('show.bs.modal', function () {
-  window.setTimeout(function ()
-  {
-    $('#add-chore-title').focus();
-  }, 0);
-});
-
-function removeOptions(selectbox)
-{
-    var i;
-    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
-    {
-        selectbox.remove(i);
-    }
-}
-</script>
 </body>
 </html>
