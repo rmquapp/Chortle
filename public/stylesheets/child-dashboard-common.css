@@ -1,12 +1,15 @@
 html, body{
     width: 100%;
     height: 100%;
-
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: column;
     flex-direction: column;
+    overflow-y:auto;
 }
 
 .chortle-navbar{
+    flex: none;
     background-color: #d8f090;
 }
 
@@ -24,20 +27,29 @@ html, body{
 }
 
 .child-view-footer{
+    flex:none;
     background-color: #ffd3d3;
     height: 50px;
     width: 100%;
     margin-top: auto;
 }
 
+@media screen and (max-height: 500px){
+    .child-view-footer {
+        display: none;
+    }
+}
+
 .child-view-container{
     display: -webkit-flex;
     display:flex;
     width: 100%;
-    flex-direction:row;
-    height: 100%;
-    overflow-y: auto;
 }
+
+.chore-list{
+    background-color: #e2fbfa;
+}
+
 .chore-detail-container{
     width:30%;
     min-width: 400px;
@@ -98,11 +110,6 @@ html, body{
 
 .chore-description{
     text-align: end;
-}
-
-.chore-list{
-    background-color: #e2fbfa;
-    height: 100%;
 }
 
 .add-chore {
