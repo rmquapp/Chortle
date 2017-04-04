@@ -107,6 +107,15 @@ router.get('/signout', function(req, res, next) {
     }
 });
 
+// Get parent credentials
+router.get('/parent', function(request, response, next) {
+    if (!request.isAuthenticated()) {
+        response.redirect('/', { errorMessage: 'You are not logged in' });
+    } else {
+        response.json({pid: request.user.local.id,
+                name: request.user.local.name});
+    }
+});
 
 // Get the chores from the assigned_chore table associated to a parent
 router.get('/chores', function(request, response) {
