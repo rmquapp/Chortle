@@ -781,8 +781,8 @@ router.post('/child', function(request, response) {
                 });
 
                 newChild.save({}, {method: 'insert'}).then(function(model) {
-                    // send child created
-                    response.send(model);
+                    // refresh page
+                    response.render('pages/index', { message: '' });
                 });
             }
         });
