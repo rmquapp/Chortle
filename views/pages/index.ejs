@@ -13,9 +13,9 @@
 <div class="parent-view-container">
     <div class="chore-list">
       <li class="add-chore" id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
-      <ul dnd-list="models.lists.Unassigned" class="unassigned"
+      <ul dnd-list="models.template" class="unassigned"
       dnd-effect-allowed="copy">
-        <li ng-repeat="item in models.lists.Unassigned"
+        <li ng-repeat="item in models.template"
           dnd-draggable="item"
           dnd-selected="choreClicked(item, $index, 'Unassigned')"
           dnd-linked="linkedCallback(item)"
@@ -156,7 +156,6 @@ app.controller("parentViewCtrl", function($scope, $http) {
   $http.get('chores').
     success(function(data, status, headers, config) {
       $scope.models = data;
-      console.log($scope.models);
     }).
     error(function(data, status, headers, config) {
       console.log("Error accessing chores endpoint");

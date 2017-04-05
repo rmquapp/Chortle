@@ -124,6 +124,7 @@ router.get('/chores', function(request, response) {
     }
     else {
         var choresJson = {};
+        var templatesJson = [];
         let parentId = request.user.local.id;
         //
         Model.getAssignedChoresParent(parentId, function (error, chores) {
@@ -156,9 +157,8 @@ router.get('/chores', function(request, response) {
                 }
                 else {
                     if(choresTemplate) {
-                        choresJson["Unassigned"] = [];
                         for (var i = 0; i < choresTemplate.chore_template.length; i++) {
-                            choresJson["Unassigned"].push(
+                            templatesJson.push(
                                 {
                                     id          : choresTemplate.chore_template[i].id,
                                     name        : choresTemplate.chore_template[i].name,
@@ -180,7 +180,7 @@ router.get('/chores', function(request, response) {
                         }
                     }
                     // Send to controller
-                    response.send({selected: null, lists: choresJson});
+                    response.send({selected: null, lists: choresJson, template: templatesJson});
 
                 });
 
