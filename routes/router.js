@@ -123,7 +123,7 @@ function validateEmail(email) {
 
 router.get('/signout', function(req, res, next) {
     if (!req.isAuthenticated()) {
-        res.redirect('/', { errorMessage: 'You are not logged in' });
+        res.redirect('/signin');
     } else {
         req.logout();
         res.redirect('/signin');
