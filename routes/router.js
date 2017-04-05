@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        res.render('pages/index');
+        res.render('pages/index', { message: '' });
     }
 });
 
@@ -45,7 +45,7 @@ router.get('/childDashboard', function(req, res, next) {
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/signin', function(req, res, next) {
     if (req.isAuthenticated()) {
-      res.render('pages/index');
+      res.render('pages/index', { message: '' });
     } else {
       res.render('pages/login', {
         message: req.flash('error')
@@ -116,6 +116,8 @@ router.post('/signup', function(req, res, next) {
     });
 });
 
+
+// http://www.regular-expressions.info/email.html
 function validateEmail(email) {
     let re = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/ig;
     return re.test(email);
@@ -724,11 +726,10 @@ router.post('parent/approve_assigned_chore/:id', function (request, response) {
 */
 router.get('/child', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.render('pages/signin');
     }
     else {
-        var children = [];
-        var parentId = request.user.local.id;
+        let parentId = request.user.local.id;
         Model.grabChildrenFromParent(parentId, function(error, data) {
             if (error) {
                 response.send({error: error});
@@ -748,15 +749,16 @@ router.get('/child', function(request, response) {
  */
 router.post('/child', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.render('pages/signin');
     }
     else {
-        // Here, req.body is { name, username, pwd, pwd-repeat }
+        // Here, req.body is { name, username, pwd, pwdRepeat }
         let child = request.body;
         let parentId = request.user.local.id;
+
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.status(500).send({ error: 'Password mismatch'});
+            response.render('pages/index', { message: 'password mismatch' });
             return;
         }
 
@@ -765,7 +767,7 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.status(500).send({ error: 'Username already exists'});
+                response.render('pages/index', { message: 'username already exists'});
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
