@@ -782,7 +782,7 @@ router.post('/child', function(request, response) {
 
                 newChild.save({}, {method: 'insert'}).then(function(model) {
                     // refresh page
-                    response.render('pages/index', { message: '' });
+                    response.redirect('/');
                 });
             }
         });
