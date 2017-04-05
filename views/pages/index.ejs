@@ -143,6 +143,7 @@ var childrenNames = [];
 var app = angular.module("parentView", ['dndLists']);
 var parentId = 0;
 var parentName = null;
+var chores = null;
 
 app.controller("parentViewCtrl", function($scope, $http) {
 
@@ -156,6 +157,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
   $http.get('chores').
     success(function(data, status, headers, config) {
       $scope.models = data;
+      chores = data;
     }).
     error(function(data, status, headers, config) {
       console.log("Error accessing chores endpoint");
@@ -176,7 +178,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     // Find out who the chore was assigned to using the ID
     var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
     var assigneeId = getChildId(assigneeName);
-      
+
     // Insert new chore into database
     var newChore =
     {
@@ -261,14 +263,19 @@ app.controller("parentViewCtrl", function($scope, $http) {
         var newAssignee = $('#selectChild').val() || "Unassigned";
 
         if (newAssignee === "Unassigned") { // Template was updated
+            editedChore.id = $scope.models.template[i].id;
             $scope.models.template[i] = editedChore;
+            $http.put("chore_template", editedChore).success( function(updatedChore) {
+                console.log("Successfully updated chore template ");
+                console.log(updatedChore);
+            });
 
-            // TODO do the put request to save template changes to the server
         }
         else { // Assigned Chore was updated or created
+            var childId =  getChildId(newAssignee);
             if (assignee === "Unassigned") { // Assigned Chore is created
 
-                var childId =  getChildId(newAssignee);
+
                 editedChore["owner"] = childId;
                 editedChore["status"] = "assigned";
                 $http.post("assigned_chore", editedChore).success(function(chore) {
@@ -281,9 +288,15 @@ app.controller("parentViewCtrl", function($scope, $http) {
             }
             else { // Assigned chore was updated
                 // Update models
+                modifiedChore = $scope.models.selected[0]
+                modifiedChore.owner = childId;
                 $scope.models.lists[assignee].splice(i, 1);
-                $scope.models.lists[newAssignee].push(editedChore);
-                // TODO do the put request to updatre assigned_chore
+                $scope.models.lists[newAssignee].push(modifiedChore);
+
+                $http.put("assigned_chore", modifiedChore).success( function(updatedChore) {
+                    console.log("Successfully assigned chore to " + newAssignee);
+                    console.log(updatedChore);
+                });
             }
         }
         break;

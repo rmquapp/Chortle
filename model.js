@@ -196,8 +196,8 @@ function getAssignedChoresParent(parentId, callback) {
 function getAssignedChore(choreId, callback) {
     var assignedChores = [];
 
-    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value',
-        'assigned_chore.status', 'child.name as child_name')
+    knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.owner', 'assigned_chore.description', 'assigned_chore.value',
+        'assigned_chore.status')
         .from('assigned_chore')
         .where('assigned_chore.id', '=', choreId)
         .then ( function (row) {
