@@ -99,3 +99,6 @@ html, body{
     margin-bottom: 40px;
 }
 
+#warning {
+    color: red;
+}

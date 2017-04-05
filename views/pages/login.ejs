@@ -11,7 +11,6 @@
 
     <!-- Bootstrap core CSS -->
     <% include ../partials/header.ejs %>
-    <script src="scripts/login.js"></script>
 </head>
 
 <body>
@@ -31,6 +30,9 @@
                         <input type="checkbox" value="remember-me"> Remember me
                     </label>
                 </div>
+                <% if (message) { %>
+                    <div id="warning"><%= message %></div>
+                <% } %>
                 <button class="btn btn-lg btn-default btn-block" type="submit">Sign in</button>
             </form>
             <div id="register-link">Don't have an account? Create one <a class="link" href="/signup">here</a>.</div>

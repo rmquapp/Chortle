@@ -1,1 +1,0 @@
-// Login jquery functionality

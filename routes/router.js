@@ -48,16 +48,18 @@ router.get('/signin', function(req, res, next) {
     if (req.isAuthenticated()) {
         res.render('/');
     } else {
-        res.render('pages/login');
+      res.render('pages/login', {
+        message: req.flash('error')
+      });
     }
 });
 
 // Authenticate user functionality
 router.post('/signin', passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: '/signin'
+    failureRedirect: '/signin',
+    failureFlash: 'Invalid username or password'
 }));
-
 
 // Serve page for signup
 router.get('/signup', function(req, res, next) {
@@ -71,20 +73,20 @@ router.get('/signup', function(req, res, next) {
 // Processing the page for user registration
 router.post('/signup', function(req, res, next) {
     // Here, req.body is { username, password }
-    var parent = req.body;
+    let parent = req.body;
 
     // Before making the account, try and fetch a username to see if it already exists.
-    var usernamePromise = new Model.Parent({ username: parent.username }).fetch();
+    let usernamePromise = new Model.Parent({ username: parent.username }).fetch();
 
     return usernamePromise.then(function(model) {
         if (model) {
             res.render('signup', { title: 'signup', errorMessage: 'username already exists' });
         } else {
-            var password = parent.password;
-            var hash = bcrypt.hashSync(password);
+            let password = parent.password;
+            let hash = bcrypt.hashSync(password);
 
             // Make a new postgres db row of the account
-            var signUpParent = new Model.Parent({
+            let signUpParent = new Model.Parent({
                 username: parent.username,
                 password: hash,
                 email: parent.email,
@@ -173,7 +175,7 @@ router.get('/chores', function(request, response) {
                         console.log(error);
                     }
                     else {
-                        for (var i = 0; i < children.length; i++) {
+                        for (let i = 0; i < children.length; i++) {
                             if (!choresJson.hasOwnProperty(children[i].name)) {
                                 choresJson[children[i].name] = [];
                             }

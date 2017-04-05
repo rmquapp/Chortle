@@ -1,4 +1,4 @@
-var express             = require('express'),
+let express             = require('express'),
     Model               = require('./model'),
     router              = require('./routes/router.js'),
     path                = require('path'),
@@ -7,6 +7,7 @@ var express             = require('express'),
     session             = require('express-session'),
     bodyParser          = require('body-parser'),
     expressSanitizer    = require('express-sanitizer');
+    flash               = require('connect-flash');
     app                 = express();
 
 app.set('port', (process.env.PORT || 5000));
@@ -25,6 +26,8 @@ app.use(session({
     secret: 'hamster kitten fight'
 }));
 
+app.use(flash());
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -36,3 +39,4 @@ app.use('/', router);
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));
 });
+
