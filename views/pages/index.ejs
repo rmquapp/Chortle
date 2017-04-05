@@ -176,7 +176,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     // Find out who the chore was assigned to using the ID
     var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
     var assigneeId = getChildId(assigneeName);
-
+      
     // Insert new chore into database
     var newChore =
     {
@@ -216,7 +216,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     // Insert new chore template into database
     $http.post("chore-template", newChoreTemplate).success(function(chore) {
         // Add new chore template to list of chore templates
-        $scope.models.lists.Unassigned.push(chore);
+        $scope.models.template.push(chore);
     }).error(function(error) {
         console.log("Failed to add chore template");
     });
@@ -243,33 +243,48 @@ app.controller("parentViewCtrl", function($scope, $http) {
   $scope.saveChore = function() {
     var editedChore =
     {
-      "owner": 1,
+      "owner": parentId,
       "name": $('#edit-chore-title').val(),
       "description": $('#edit-chore-description').val(),
       "value": parseInt($('#edit-chore-value').val()) || 0
     }
-
     var lists = $scope.models.lists;
     var assignee = $scope.models.selected[1] || "Unassigned";
     var item = $scope.models.selected[0];
-
     var list = lists[assignee];
+    if (assignee === "Unassigned") {
+       list =  $scope.models.template;
+    }
+
     for (var i = 0; i < list.length; i++) {
       if (list[i] == item) {
         var newAssignee = $('#selectChild').val() || "Unassigned";
 
-        // If the assignee has not been changed, update the chore
-        if (assignee == newAssignee) {
-          $scope.models.lists[assignee][i] = editedChore;
-          $('#edit-chore-modal').modal('hide');
-        }
+        if (newAssignee === "Unassigned") { // Template was updated
+            $scope.models.template[i] = editedChore;
 
-        // If the assignee has changed, move the updated chore
-        else {
-          if (assignee != "Unassigned") {
-            $scope.models.lists[assignee].splice(i, 1);
-          }
-          $scope.models.lists[newAssignee].push(editedChore);
+            // TODO do the put request to save template changes to the server
+        }
+        else { // Assigned Chore was updated or created
+            if (assignee === "Unassigned") { // Assigned Chore is created
+
+                var childId =  getChildId(newAssignee);
+                editedChore["owner"] = childId;
+                editedChore["status"] = "assigned";
+                $http.post("assigned_chore", editedChore).success(function(chore) {
+                    editedChore["id"] = chore.id;
+                    $scope.models.lists[newAssignee].push(editedChore);
+                    console.log("Successfully assigned chore to " + newAssignee);
+                }).error(function(error) {
+                    console.log("Failed to add chore: " + error);
+                });
+            }
+            else { // Assigned chore was updated
+                // Update models
+                $scope.models.lists[assignee].splice(i, 1);
+                $scope.models.lists[newAssignee].push(editedChore);
+                // TODO do the put request to updatre assigned_chore
+            }
         }
         break;
       }
@@ -371,12 +386,14 @@ function getChildId(childName) {
 function findAssignee(lists, id, children) {
   for (var index in children) {
     var child = children[index];
-    var list = lists[child];
-    for (var i = 0; i < list.length; i++) {
-      var chore = list[i];
-      if (chore['id'] == id) {
-        return child;
-      }
+    if (child !== "") {
+        var list = lists[child];
+        for (var i = 0; i < list.length; i++) {
+            var chore = list[i];
+            if (chore['id'] == id) {
+                return child;
+            }
+        }
     }
   }
 }
