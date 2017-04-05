@@ -29,7 +29,6 @@ router.get('/', function(req, res, next) {
         res.redirect('/signin');
     } else {
         res.render('pages/index');
-
     }
 });
 
@@ -46,7 +45,7 @@ router.get('/childDashboard', function(req, res, next) {
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/signin', function(req, res, next) {
     if (req.isAuthenticated()) {
-        res.render('/');
+      res.render('pages/index');
     } else {
       res.render('pages/login', {
         message: req.flash('error')
@@ -66,21 +65,30 @@ router.get('/signup', function(req, res, next) {
     if (req.isAuthenticated()) {
         res.redirect('/');
     } else {
-        res.render('pages/signup', { title: 'Sign Up' });
+        res.render('pages/signup', {
+            title: 'Sign Up',
+            message: ''
+        });
     }
 });
 
 // Processing the page for user registration
 router.post('/signup', function(req, res, next) {
-    // Here, req.body is { username, password }
+    // Here, req.body is { username, password, pwdRepeat }
     let parent = req.body;
+
+    // Make sure password typed correctly
+    if (parent.password !== parent.pwdRepeat) {
+        res.render('pages/signup', { title: 'signup', message: 'password mismatch' });
+        return;
+    }
 
     // Before making the account, try and fetch a username to see if it already exists.
     let usernamePromise = new Model.Parent({ username: parent.username }).fetch();
 
     return usernamePromise.then(function(model) {
         if (model) {
-            res.render('signup', { title: 'signup', errorMessage: 'username already exists' });
+            res.render('pages/signup', { title: 'signup', message: 'username already exists' });
         } else {
             let password = parent.password;
             let hash = bcrypt.hashSync(password);
@@ -94,7 +102,9 @@ router.post('/signup', function(req, res, next) {
 
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
-                res.redirect(307, '/');
+                passport.authenticate('local')(req, res, function () {
+                    res.redirect('/');
+                })
             });
         }
     });
@@ -125,8 +135,8 @@ router.get('/chores', function(request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-        var choresJson = {};
-        var templatesJson = [];
+        let choresJson = {};
+        let templatesJson = [];
         let parentId = request.user.local.id;
         //
         Model.getAssignedChoresParent(parentId, function (error, chores) {
@@ -135,8 +145,8 @@ router.get('/chores', function(request, response) {
             }
             else {
                 if (chores) {
-                    for ( var i = 0; i < chores.assigned_chores.length; i ++) {
-                        var currentChore = chores.assigned_chores[i];
+                    for ( let i = 0; i < chores.assigned_chores.length; i ++) {
+                        let currentChore = chores.assigned_chores[i];
                         if (choresJson[currentChore["name"]] == undefined) {
                             choresJson[currentChore["name"]] = [];
                         }
