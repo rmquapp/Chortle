@@ -46,7 +46,7 @@ router.get('/childDashboard', function(req, res, next) {
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/signin', function(req, res, next) {
     if (req.isAuthenticated()) {
-        res.render('/');
+      res.render('pages/index');
     } else {
       res.render('pages/login', {
         message: req.flash('error')
@@ -125,8 +125,8 @@ router.get('/chores', function(request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-        var choresJson = {};
-        var templatesJson = [];
+        let choresJson = {};
+        let templatesJson = [];
         let parentId = request.user.local.id;
         //
         Model.getAssignedChoresParent(parentId, function (error, chores) {
@@ -135,8 +135,8 @@ router.get('/chores', function(request, response) {
             }
             else {
                 if (chores) {
-                    for ( var i = 0; i < chores.assigned_chores.length; i ++) {
-                        var currentChore = chores.assigned_chores[i];
+                    for ( let i = 0; i < chores.assigned_chores.length; i ++) {
+                        let currentChore = chores.assigned_chores[i];
                         if (choresJson[currentChore["name"]] == undefined) {
                             choresJson[currentChore["name"]] = [];
                         }
