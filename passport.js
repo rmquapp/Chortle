@@ -1,4 +1,4 @@
-var LocalStrategy    = require('passport-local').Strategy,
+let LocalStrategy    = require('passport-local').Strategy,
     Model            = require('./model.js'),
     bcrypt           = require('bcrypt-nodejs'),
     User             = Model.User;
@@ -16,7 +16,7 @@ module.exports = function(passport) {
 
     passport.use('local', new LocalStrategy(function(username, password, done) {
         new Model.Parent({username: username}).fetch().then(function(data) {
-            var user = data;
+            let user = data;
             if (user === null) {
                 return done(null, false, { message: 'Invalid username or password' });
             } else {
@@ -30,4 +30,4 @@ module.exports = function(passport) {
         });
     }));
 
-}
+};
