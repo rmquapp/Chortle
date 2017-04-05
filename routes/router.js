@@ -66,7 +66,10 @@ router.get('/signup', function(req, res, next) {
     if (req.isAuthenticated()) {
         res.redirect('/');
     } else {
-        res.render('pages/signup', { title: 'Sign Up' });
+        res.render('pages/signup', {
+            title: 'Sign Up',
+            message: ''
+        });
     }
 });
 
@@ -75,12 +78,18 @@ router.post('/signup', function(req, res, next) {
     // Here, req.body is { username, password }
     let parent = req.body;
 
+    // Make sure password typed correctly
+    if (parent.pwd !== parent.pwdRepeat) {
+        res.render('pages/signup', { title: 'signup', message: 'password mismatch' });
+        return;
+    }
+
     // Before making the account, try and fetch a username to see if it already exists.
     let usernamePromise = new Model.Parent({ username: parent.username }).fetch();
 
     return usernamePromise.then(function(model) {
         if (model) {
-            res.render('signup', { title: 'signup', errorMessage: 'username already exists' });
+            res.render('pages/signup', { title: 'signup', message: 'username already exists' });
         } else {
             let password = parent.password;
             let hash = bcrypt.hashSync(password);

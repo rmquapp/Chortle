@@ -321,3 +321,8 @@ ul[dnd-list] li {
 
 /* Show the dropdown menu */
 .show {display:block;}
+
+#warning {
+  color: red;
+  text-align: center;
+}
