@@ -74,8 +74,14 @@ router.get('/signup', function(req, res, next) {
 
 // Processing the page for user registration
 router.post('/signup', function(req, res, next) {
-    // Here, req.body is { username, password, pwdRepeat }
+    // Here, req.body is { username, email, password, pwdRepeat }
     let parent = req.body;
+
+    // Make sure valid email address entered
+    if (!validateEmail(parent.email)) {
+        res.render('pages/signup', { title: 'signup', message: 'invalid email' });
+        return;
+    }
 
     // Make sure password typed correctly
     if (parent.password !== parent.pwdRepeat) {
@@ -109,6 +115,11 @@ router.post('/signup', function(req, res, next) {
         }
     });
 });
+
+function validateEmail(email) {
+    let re = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/ig;
+    return re.test(email);
+}
 
 router.get('/signout', function(req, res, next) {
     if (!req.isAuthenticated()) {
