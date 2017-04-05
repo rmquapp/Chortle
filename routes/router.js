@@ -29,7 +29,6 @@ router.get('/', function(req, res, next) {
         res.redirect('/signin');
     } else {
         res.render('pages/index');
-
     }
 });
 
@@ -75,11 +74,11 @@ router.get('/signup', function(req, res, next) {
 
 // Processing the page for user registration
 router.post('/signup', function(req, res, next) {
-    // Here, req.body is { username, password }
+    // Here, req.body is { username, password, pwdRepeat }
     let parent = req.body;
 
     // Make sure password typed correctly
-    if (parent.pwd !== parent.pwdRepeat) {
+    if (parent.password !== parent.pwdRepeat) {
         res.render('pages/signup', { title: 'signup', message: 'password mismatch' });
         return;
     }
@@ -103,7 +102,9 @@ router.post('/signup', function(req, res, next) {
 
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
-                res.redirect(307, '/');
+                passport.authenticate('local')(req, res, function () {
+                    res.redirect('/');
+                })
             });
         }
     });
