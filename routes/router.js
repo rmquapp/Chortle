@@ -568,6 +568,7 @@ router.put('/assigned_chore', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
+
         let jsonKeys = ['id', 'owner', 'name', 'description', 'value', 'status'];
         // Ensure id, name, description and value are present in the form received
         for (var i = 0; i < jsonKeys.length; i++) {
@@ -591,7 +592,6 @@ router.put('/assigned_chore', function (request, response) {
                     value       : request.body.value,
                     status      : request.body.status,
                 });
-
                 assignedChore.save({}, {method: 'update'}).then ( function (model) {
                     response.json(model);
                 });
