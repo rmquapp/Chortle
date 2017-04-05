@@ -13,9 +13,9 @@
 <div class="parent-view-container">
     <div class="chore-list">
       <li class="add-chore" id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
-      <ul dnd-list="models.lists.Unassigned" class="unassigned"
+      <ul dnd-list="models.template" class="unassigned"
       dnd-effect-allowed="copy">
-        <li ng-repeat="item in models.lists.Unassigned"
+        <li ng-repeat="item in models.template"
           dnd-draggable="item"
           dnd-selected="choreClicked(item, $index, 'Unassigned')"
           dnd-linked="linkedCallback(item)"
@@ -25,82 +25,26 @@
         </li>
       </ul>
     </div>
-    <div class="kids-lists">
-      <div class="kid-list">
-        <div class="kids-chores">
-        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Ruby</h6>
-        <hr>
-        <ul dnd-list="models.lists.Ruby">
-          <li ng-repeat="item in models.lists.Ruby"
-              dnd-selected="choreClicked(item, index, 'Ruby')"
-              dnd-draggable="item"
-              dnd-moved="models.lists.Ruby.splice($index, 1)"
-              dnd-effect-allowed="move">
-              {{item.name}}
-          </li>
-        </ul>
-        </div>
-        <div class="kid-bank">
-          <h3 class="bank-amount">$6</h3>
-        </div>
-      </div>
-      <div class="kid-list">
-        <div class="kids-chores">
-        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Dexter</h6>
-        <hr>
-        <ul dnd-list="models.lists.Dexter">
-          <li ng-repeat="item in models.lists.Dexter"
-              dnd-draggable="item"
-              dnd-selected="choreClicked(item, index, 'Dexter')"
-              dnd-moved="models.lists.Dexter.splice()"
-              dnd-effect-allowed="move">
-              {{item.name}}
-          </li>
-        </ul>
-        </div>
-        <div class="kid-bank">
-          <h3 class="bank-amount">$8</h3>
-        </div>
-      </div>
-      <div class="kid-list">
-        <div class="kids-chores">
-        <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>Toulouse</h6>
-        <hr>
-        <ul dnd-list="models.lists.Toulouse">
-          <li ng-repeat="item in models.lists.Toulouse"
-              dnd-draggable="item"
-              dnd-selected="choreClicked(item, index, 'Toulouse')"
-              dnd-moved="models.lists.Toulouse.splice($index, 1)"
-              dnd-effect-allowed="move">
-              {{item.name}}
-          </li>
-        </ul>
-        </div>
-        <div class="kid-bank">
-          <h3 class="bank-amount">$5</h3>
-        </div>
-      </div>
-      <div class="kid-list">
-          <div class="kids-chores">
-            <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>AnotherKid</h6>
-            <hr>
-            <ul dnd-list="models.lists.Toulouse">
-              <li ng-repeat="item in models.lists.Toulouse"
-                  dnd-draggable="item"
-                  dnd-moved="models.lists.Toulouse.splice($index, 1)"
-                  dnd-effect-allowed="move">
-                {{item.name}}
-              </li>
-            </ul>
-          </div>
-          <div class="kid-bank">
-            <h3 class="bank-amount">$10</h3>
-          </div>
-        </div>
-      </div>
+      <ul class="kids-lists">
+        <li ng-repeat="(listName, list) in models.lists"
+                  class="kid-list">
+            <div class="kids-chores">
+              <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>{{listName}}</h6>
+              <hr>
+              <ul dnd-list="list">
+                  <li ng-repeat="item in list"
+                      dnd-selected="choreClicked(item, $index, listName)"
+                      dnd-draggable="item"
+                      dnd-moved="list.splice($index, 1)"
+                      dnd-effect-allowed="move"> {{item.name}}</li>
+              </ul>
+            </div>
+            <div class="kid-bank">
+              <h3 class="bank-amount">$5</h3>
+            </div>
+        </li>
+      </ul>
     </div>
-  </div>
-</div>
 
 <div id="add-chore-modal" class="modal fade">
   <div class="modal-dialog">
@@ -197,8 +141,17 @@
 var children = [];
 var childrenNames = [];
 var app = angular.module("parentView", ['dndLists']);
+var parentId = 0;
+var parentName = null;
 
 app.controller("parentViewCtrl", function($scope, $http) {
+
+
+    $http.get('parent').
+          success(function (response) {
+      parentId = response["pid"];
+      parentName = response["name"];
+  });
 
   $http.get('chores').
     success(function(data, status, headers, config) {
@@ -208,7 +161,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
       console.log("Error accessing chores endpoint");
   });
 
-  $http.get('children').
+  $http.get('child').
     success(function(response) {
       children = response["children"];
       for (var i = 0; i < children.length; i++) {
@@ -227,7 +180,6 @@ app.controller("parentViewCtrl", function($scope, $http) {
     // Insert new chore into database
     var newChore =
     {
-      "parentId": 1,
       "owner": parseInt(assigneeId),
       "name": item['name'],
       "description": item['description'],
@@ -236,7 +188,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     };
 
     // Add new chore to database
-    $http.post("chores", newChore).success(function(chore) {
+    $http.post("assigned_chore", newChore).success(function(chore) {
       console.log("Successfully assigned chore");
 
       // Update ID to reflect database
@@ -247,14 +199,14 @@ app.controller("parentViewCtrl", function($scope, $http) {
         }
       }
     }).error(function(error) {
-      console.log("Failed to add chore");
+      console.log("Failed to add chore: " + error);
     });  
   };
 
   $scope.addChoreTemplate = function() {
     var newChoreTemplate =
     {
-      "owner": 1,
+      "owner": parentId,
       "name": $('#add-chore-title').val(),
       "description": $('#add-chore-description').val(),
       "value": parseInt($('#add-chore-value').val()) || 0
@@ -341,7 +293,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     removeOptions(document.getElementById('selectChild'));
 
     // Populate select input for assigning a chore to a child
-    var children = ["Ruby", "Dexter", "Toulouse"];
+    var children = childrenNames;
     var index = children.indexOf(assignee);
     if (index > -1) {
       children.splice(index, 1);

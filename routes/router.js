@@ -109,6 +109,15 @@ router.get('/signout', function(req, res, next) {
     }
 });
 
+// Get parent credentials
+router.get('/parent', function(request, response, next) {
+    if (!request.isAuthenticated()) {
+        response.redirect('/', { errorMessage: 'You are not logged in' });
+    } else {
+        response.json({pid: request.user.local.id,
+                name: request.user.local.name});
+    }
+});
 
 // Get the chores from the assigned_chore table associated to a parent
 router.get('/chores', function(request, response) {
@@ -117,6 +126,7 @@ router.get('/chores', function(request, response) {
     }
     else {
         var choresJson = {};
+        var templatesJson = [];
         let parentId = request.user.local.id;
         //
         Model.getAssignedChoresParent(parentId, function (error, chores) {
@@ -149,9 +159,8 @@ router.get('/chores', function(request, response) {
                 }
                 else {
                     if(choresTemplate) {
-                        choresJson["Unassigned"] = [];
                         for (var i = 0; i < choresTemplate.chore_template.length; i++) {
-                            choresJson["Unassigned"].push(
+                            templatesJson.push(
                                 {
                                     id          : choresTemplate.chore_template[i].id,
                                     name        : choresTemplate.chore_template[i].name,
@@ -173,7 +182,7 @@ router.get('/chores', function(request, response) {
                         }
                     }
                     // Send to controller
-                    response.send({selected: null, lists: choresJson});
+                    response.send({selected: null, lists: choresJson, template: templatesJson});
 
                 });
 
@@ -493,11 +502,9 @@ router.post('/assigned_chore', function (request, response) {
                 for ( var i=0; i < children.length; i++) {
                     if(childId === children[i].id) {
                         childFound = true;
-                        return;
                     }
                 }
                 if (childFound) {
-
                     // Create new assigned_chore object
                     var assignedChore = new Model.AssignedChore({
                         owner : request.body.owner,
@@ -508,7 +515,7 @@ router.post('/assigned_chore', function (request, response) {
                     });
 
                     assignedChore.save({}, {method: 'insert'}).then ( function (model) {
-                        response.json(model);
+                        return response.json(model);
                     });
                 }
                 else {
@@ -699,7 +706,18 @@ router.get('/child', function(request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-
+        var children = [];
+        var parentId = request.user.local.id;
+        Model.grabChildrenFromParent(parentId, function(error, data) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (data) {
+                    response.send({children: data});
+                }
+            }
+        });
     }
 });
 
