@@ -53,18 +53,14 @@
       <div class="chore-approval-label">Chores Waiting for Approval</div>
       <div class="chore-approval-inner">
         <div class="chore-approval-list-container">
-          <ul class="list-unstyled chore-approval-list">
-            <li>
-              <div class="approval-chore-amount">$10</div>
-              <div class="approval-chore-name">Chore 1 Is a longer chore with a longer name, i dunno why?</div>
-            </li>
-            <li>
-              <span class="approval-chore-amount">$15</span>
-              <span class="approval-chore-name">Chore 2</span>
-            </li>
-            <li>
-              <span class="approval-chore-amount">$5</span>
-              <span class="approval-chore-name">Chore 3</span>
+          <ul  class="list-unstyled chore-approval-list">
+            <li ng-repeat="item in models.pendingApprovalList"
+                dnd-draggable="none"
+                dnd-disable-if ="true"
+                dnd-selected="models.selected = item"
+                ng-class="{selected: models.selected === item}">
+              <div class="approval-chore-amount">${{item.value}}</div>
+              <div class="approval-chore-name">{{item.name}}</div>
             </li>
           </ul>
         </div><!-- chore-approval-list-container -->
@@ -75,7 +71,7 @@
     </div> <!-- approval-container -->
     <div class="balance-container">
       <div class="piggybank-balance-label">Piggy Bank Balance</div>
-      <div class="piggy-bank-balance"><div class="bank-amount">$48</div></div>
+      <div class="piggy-bank-balance"><div class="bank-amount">${{models.funds}}</div></div>
     </div> <!-- balance-container -->
   </div> <!-- approval-balance-container -->
 
