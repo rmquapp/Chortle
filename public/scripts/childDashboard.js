@@ -24,6 +24,9 @@
                     status:assigned_chores[i]["status"]
                 });
             }
+            if($scope.models.selected == null && $scope.models.choreList.length > 0){
+                $scope.models.selected = $scope.models.choreList[0];
+            }
         }).
         error(function(error) {
             console.log("Error accessing child assigned chores endpoint");
