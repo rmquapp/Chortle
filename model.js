@@ -112,7 +112,7 @@ function grabChildCredentials(childId, callback) {
            loginChild.local.username    = row.username;
            loginChild.local.password    = row.password;
            loginChild.local.id          = row.id;
-           loginChild.local.parent      = 'child';
+           loginChild.local.role      = 'child';
            callback(null, loginChild);
        }
     });
@@ -289,6 +289,21 @@ function getChild(childId, callback) {
         });
 }
 
+function setStatusAssignedChore(choreId, status, callback) {
+
+    knex('assigned_chore')
+        .where('assigned_chore.id', '=', choreId)
+        .update({status: status})
+        .then( function (row) {
+            if (row.length <=0) {
+                callback('Could not update assigned chore', null);
+            }
+            else {
+                callback(null, " assigned chore with id " + choreId + " was updated");
+            }
+        })
+}
+
 module.exports = {
     createNewParent         : createNewParent,
     grabParentCredentials   : grabParentCredentials,
@@ -305,6 +320,7 @@ module.exports = {
     getAssignedChore        : getAssignedChore,
     deleteAssignedChore     : deleteAssignedChore,
     getChild                : getChild,
+    setStatusAssignedChore   : setStatusAssignedChore,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
