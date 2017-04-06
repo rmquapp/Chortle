@@ -42,7 +42,7 @@
               </ul>
             </div>
             <div class="kid-bank">
-              <h3 class="bank-amount">$5</h3>
+              <h3 class="bank-amount">${{$parent.children[listName]["piggybank"]}}</h3>
             </div>
         </li>
       </ul>
@@ -164,8 +164,21 @@ app.controller("parentViewCtrl", function($scope, $http) {
   $http.get('child').
     success(function(response) {
       children = response["children"];
+      $scope.children = {};
+      var childInfo;
       for (var i = 0; i < children.length; i++) {
-        childrenNames.push(children[i]["name"]);
+        var child = children[i];
+        var name = child["name"];
+
+        childInfo = {
+          "id": child["id"],
+          "piggybank": child["piggybank"]
+        };
+        childrenNames.push(name);
+
+        // Add children to scope so that their account balances can be accessed
+        // from the ng-repeat directive
+        $scope.children[name] = childInfo;
       }
     }).
     error(function(error) {
