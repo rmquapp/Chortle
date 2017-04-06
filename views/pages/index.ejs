@@ -34,9 +34,10 @@
               <hr>
               <ul dnd-list="list">
                   <li ng-repeat="item in list"
-                      dnd-selected="choreClicked(item, $index, listName)"
                       dnd-draggable="item"
-                      dnd-moved="list.splice($index, 1)"
+                      dnd-selected="choreClicked(item, $index, listName)"
+                      dnd-dragend="dragEndCallback(item, $index, listName)"
+                      dnd-moved="movedCallBack(item, list, $index)"
                       dnd-effect-allowed="move"> {{item.name}}</li>
               </ul>
             </div>
@@ -201,6 +202,40 @@ app.controller("parentViewCtrl", function($scope, $http) {
       console.log("Failed to add chore: " + error);
     });  
   };
+
+  // Function that updates selected object from model in $scope.models
+  $scope.movedCallBack = function(item, list, index) {
+      list.splice(index, 1);
+      var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
+      var assigneeId = getChildId(assigneeName);
+      $scope.models.selected = [item, assigneeId];
+
+  };
+
+  // Function that takes the selected object and sends a reassigned chore in a PUT request
+  $scope.dragEndCallback = function(item, index, assignee) {
+
+      if ($scope.models.selected[1]) {
+          var newAssignee = $scope.models.selected[1];
+
+          var reassignedChore = {
+              "id": item.id,
+              "owner": newAssignee,
+              "name": item.name,
+              "description": item.description,
+              "value": item.value,
+              "status": item.status,
+          };
+
+          // Update with a puth request to API
+          $http.put("assigned_chore", reassignedChore).success( function(updatedChore) {
+              console.log("Successfully assigned chore to " + newAssignee);
+          });
+      }
+
+
+  };
+
 
   $scope.addChoreTemplate = function() {
     var newChoreTemplate =
