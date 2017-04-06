@@ -5,14 +5,29 @@
 (function (angular) {
     'use strict';
     let app = angular.module("childDashboard", ['dndLists', 'ngRoute']);
-    app.controller("childDashboardCtrl", function ($scope, service) {
+    app.controller("childDashboardCtrl", function ($scope, $http) {
+
         $scope.models = {
             selected: null,
-            choreList: [
-                {name:"Chore 1", selected:true},
-                {name:"Chore 2"}
-                ],
+            choreList: []
         };
+
+        $http.get('child/assigned_chore').
+        success(function(response) {
+            let assigned_chores = response["assigned_chores"];
+            for (let i = 0; i < assigned_chores.length; i++) {
+                $scope.models.choreList.push({
+                    id:assigned_chores[i]["id"],
+                    name:assigned_chores[i]["name"],
+                    description:assigned_chores[i]["description"],
+                    value:assigned_chores[i]["value"],
+                    status:assigned_chores[i]["status"]
+                });
+            }
+        }).
+        error(function(error) {
+            console.log("Error accessing child assigned chores endpoint");
+        });
 
 
         $scope.$watch('models.choreList', function(model) {
@@ -39,7 +54,7 @@
 // http://stackoverflow.com/questions/14154767/angular-js-refresh-service-inside-a-controller
     app.factory('service', function ($q, $http) {
         return {
-// return a promise to controller
+            // return a promise to controller
             getHistoricalDataWithQ: function () {
                 let deferred = $q.defer();
                 let url = 'https://chortle-seng513.herokuapp.com/chores';
