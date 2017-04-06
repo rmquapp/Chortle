@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        if (req.user.role == 'child') {
+        if (req.user.local.role == 'child') {
             res.render('pages/childDashboard');
 
         } else {

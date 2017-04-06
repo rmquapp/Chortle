@@ -112,7 +112,7 @@ function grabChildCredentials(childId, callback) {
            loginChild.local.username    = row.username;
            loginChild.local.password    = row.password;
            loginChild.local.id          = row.id;
-           loginChild.local.parent      = 'child';
+           loginChild.local.role      = 'child';
            callback(null, loginChild);
        }
     });
