@@ -91,13 +91,13 @@ router.post('/signup', function(req, res, next) {
 
     // Make sure valid email address entered
     if (!validateEmail(parent.email)) {
-        res.render('pages/signup', { title: 'signup', message: 'invalid email' });
+        res.send({ success: false, error: 'invalid email address' });
         return;
     }
 
     // Make sure password typed correctly
     if (parent.password !== parent.pwdRepeat) {
-        res.render('pages/signup', { title: 'signup', message: 'password mismatch' });
+        res.send({ success: false, error: 'password mismatch' });
         return;
     }
 
@@ -106,7 +106,7 @@ router.post('/signup', function(req, res, next) {
 
     return usernamePromise.then(function(model) {
         if (model) {
-            res.render('pages/signup', { title: 'signup', message: 'username already exists' });
+            res.send({ success: false, error: 'username already exists' });
         } else {
             let password = parent.password;
             let hash = bcrypt.hashSync(password);
@@ -121,7 +121,7 @@ router.post('/signup', function(req, res, next) {
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
                 passport.authenticate('local')(req, res, function () {
-                    res.redirect('/');
+                    res.send({ success: true });
                 });
             });
         }
@@ -770,7 +770,7 @@ router.post('/child', function(request, response) {
 
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.render('pages/index', { message: 'password mismatch' });
+            response.send({ success: false, error: 'password mismatch' });
             return;
         }
 
@@ -779,7 +779,7 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.render('pages/index', { message: 'username already exists'});
+                response.send({ success: false, error: 'username already exists' });
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
@@ -793,8 +793,7 @@ router.post('/child', function(request, response) {
                 });
 
                 newChild.save({}, {method: 'insert'}).then(function(model) {
-                    // refresh page
-                    response.redirect('/');
+                    response.send({ success: true });
                 });
             }
         });
