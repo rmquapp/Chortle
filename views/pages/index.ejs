@@ -108,30 +108,29 @@
         <h3>Add A Child</h3>
       </div>
       <div class="modal-body">
-        <form>
-
-
+        <form action="/child" method="post">
             <label><b>Child Name</b></label>
-            <input type="text" placeholder="Enter Child Name" id="child-name" name="name" required>
+            <input type="text" placeholder="Enter Child Name" id="child-name" name="name" required autofocus>
 
             <label><b>Username</b></label>
             <input type="text" placeholder="Enter Username" id="child-username" name="username" required>
 
             <label><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" id="child-psw" name="psw" required>
+            <input type="password" placeholder="Enter Password" id="child-psw" name="pwd" required>
 
             <label><b>Repeat Password</b></label>
-            <input type="password" placeholder="Repeat Password" id="child-psw-repeat" name="psw-repeat" required>
+            <input type="password" placeholder="Repeat Password" id="child-psw-repeat" name="pwdRepeat" required>
+
+            <% if (message) { %>
+              <div id="warning"><%= message %></div>
+              <script>$("#addChild").modal('show');</script>
+            <% } %>
+
+            <button class="cancel" data-dismiss="modal" onclick="window.history.pushState('', document.title, '/');" type="button">Cancel</button>
+            <button class="submit" type="Submit">Submit</button>
 
             <p><br></p>
-            <div id="warning"></div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <section>
-          <button id="js-trigger-overlay" ng-click="addChild()" type="button">Submit</button>
-        </section>
-        <button id="cancel-button" data-dismiss="modal" type="button">Cancel</button>
       </div>
     </div>
   </div>
@@ -139,12 +138,12 @@
 
 
 <script>
-var children = [];
-var childrenNames = [];
-var app = angular.module("parentView", ['dndLists']);
-var parentId = 0;
-var parentName = null;
-var chores = null;
+let children = [];
+let childrenNames = [];
+let app = angular.module("parentView", ['dndLists']);
+let parentId = 0;
+let parentName = null;
+let chores = null;
 
 app.controller("parentViewCtrl", function($scope, $http) {
 
@@ -197,7 +196,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
       // Update ID to reflect database
       var chores = $scope.models.lists[assigneeName];
       for (var i in chores) {
-        if (chores[i]["id"] == item["id"]) {
+        if (chores[i]["id"] === item["id"]) {
           $scope.models.lists[assigneeName][i]["id"] = chore["id"];
         }
       }
@@ -294,7 +293,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }
 
     for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
+      if (list[i] === item) {
         var newAssignee = $('#selectChild').val() || "Unassigned";
 
         if (newAssignee === "Unassigned") { // Template was updated
@@ -347,7 +346,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     $('#edit-chore-description').val(item['description']);
     $('#edit-chore-value').val(item['value']);
 
-    if (assignee == "Unassigned") {
+    if (assignee === "Unassigned") {
       assignee = "";
     }
     $scope.models.selected = [item, assignee];
@@ -380,7 +379,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
 
     var list = lists[assignee];
     for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
+      if (list[i] === item) {
         $scope.models.lists[assignee].splice(i, 1);
         break;
       }
@@ -408,8 +407,6 @@ $(function(){
     $('#child-psw').val("");
     $('#child-psw-repeat').val("");
     $('#child-username').val("");
-    $('#warning').val("");
-    $('#child-name').focus();
 
     return false;
     });
@@ -425,7 +422,7 @@ $('#chore-modal').on('show.bs.modal', function () {
 
 function getChildId(childName) {
   for (var i = 0; i < children.length; i++) {
-    if (children[i]["name"] == childName) {
+    if (children[i]["name"] === childName) {
       return children[i]["id"];
     }
   }
@@ -438,7 +435,7 @@ function findAssignee(lists, id, children) {
         var list = lists[child];
         for (var i = 0; i < list.length; i++) {
             var chore = list[i];
-            if (chore['id'] == id) {
+            if (chore['id'] === id) {
                 return child;
             }
         }
