@@ -837,32 +837,6 @@ router.post('/child', function(request, response) {
 });
 
 /*
- * via PUT https://chortle-seng513.herokuapp.com/child
- * updates a child account associated to parent logged in
- */
-router.put('/child', function (request, response) {
-    if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
-    }
-    else {
-
-    }
-});
-
-/*
- * via DELETE https://chortle-seng513.herokuapp.com/child
- * deletes a child account associated to parent logged in
- */
-router.delete('/child', function (request, response) {
-    if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
-    }
-    else {
-
-    }
-});
-
-/*
  * via GET https://chortle-seng513.herokuapp.com/child/funds
  * returns the funds for a child
  */
