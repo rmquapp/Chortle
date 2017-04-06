@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        if (req.user.role == 'child') {
+        if (req.user.role === 'child') {
             res.render('pages/childDashboard');
 
         } else {
@@ -78,8 +78,7 @@ router.get('/signup', function(req, res, next) {
         res.redirect('/');
     } else {
         res.render('pages/signup', {
-            title: 'Sign Up',
-            message: ''
+            title: 'Sign Up'
         });
     }
 });
@@ -163,7 +162,7 @@ router.get('/chores', function(request, response) {
         let choresJson = {};
         let templatesJson = [];
         let parentId = request.user.local.id;
-        //
+
         Model.getAssignedChoresParent(parentId, function (error, chores) {
             if (error) {
                 console.log(error);
@@ -172,7 +171,7 @@ router.get('/chores', function(request, response) {
                 if (chores) {
                     for ( let i = 0; i < chores.assigned_chores.length; i ++) {
                         let currentChore = chores.assigned_chores[i];
-                        if (choresJson[currentChore["name"]] == undefined) {
+                        if (choresJson[currentChore["name"]] === undefined) {
                             choresJson[currentChore["name"]] = [];
                         }
                         choresJson[currentChore["name"]].push(
@@ -634,7 +633,7 @@ router.put('/child/assigned_chore', function (request, response) {
         let jsonKeys = ['id', 'name', 'description', 'value', 'status'];
         let childId = request.user.local.id;
         // Ensure id, name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
@@ -827,30 +826,115 @@ router.delete('/child', function (request, response) {
 });
 
 /*
- * via POST https://chortle-seng513.herokuapp.com/child/add_funds
- * increases the funds of child account
- * It requires parent user to be logged in
+ * via GET https://chortle-seng513.herokuapp.com/child/funds
+ * returns the funds for a child
  */
-router.post('/child/add_funds', function(request, response) {
+router.get('/child/funds', function(request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-
+        let childId = request.user.local.id;
+        Model.getChild(childId, function(error, child) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (child) {
+                    response.send({funds: child.piggybank});
+                }
+            }
+        });
     }
 });
 
 /*
- * via POST https://chortle-seng513.herokuapp.com/child/add_funds
- * decreases the funds of child account
+ * via PUT https://chortle-seng513.herokuapp.com/child/add_funds
+ * increases the funds of child account by the value given
  * It requires parent user to be logged in
  */
-router.post('/child/remove_funds', function(request, response) {
+router.put('/child/add_funds', function(request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
+        let jsonKeys = ['childId', 'value'];
+        // Ensure values are present in the form received
+        for (let i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
 
+        // Obtain child from db, ensure it exists
+        Model.getChild(request.body.childId, function (error, oldChild) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                let newValue = parseInt(oldChild.piggybank) + request.body.value;
+
+                let newChild = new Model.Child({
+                    id: request.body.childId,
+                    name: oldChild.name,
+                    username: oldChild.username,
+                    p_id: oldChild.p_id,
+                    password: oldChild.password,
+                    piggybank: newValue,
+                });
+
+                newChild.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
+    }
+});
+
+/*
+ * via PUT https://chortle-seng513.herokuapp.com/child/remove_funds
+ * decreases the funds of child account by the value given
+ * It requires parent user to be logged in
+ */
+router.put('/child/remove_funds', function(request, response) {
+    if (!request.isAuthenticated()) {
+        response.send({error: ERROR.NOT_LOGGED});
+    }
+    else {
+        let jsonKeys = ['childId', 'value'];
+        // Ensure values are present in the form received
+        for (let i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
+
+        // Obtain child from db, ensure it exists
+        Model.getChild(request.body.childId, function (error, oldChild) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                let newValue = parseInt(oldChild.piggybank) - request.body.value;
+
+                if (newValue < 0) {
+                    return response.send({error: 'insufficient funds'});
+                }
+
+                let newChild = new Model.Child({
+                    id: request.body.childId,
+                    name: oldChild.name,
+                    username: oldChild.username,
+                    p_id: oldChild.p_id,
+                    password: oldChild.password,
+                    piggybank: newValue,
+                });
+
+                newChild.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
     }
 });
 
@@ -889,7 +973,7 @@ router.post('/chores', function(req, res, next) {
         });
 
 
-        var assignedChore = new Model.AssignedChore({
+        let assignedChore = new Model.AssignedChore({
             owner       : choreToCreate.owner,
             name        : choreToCreate.name,
             description : choreToCreate.description,
