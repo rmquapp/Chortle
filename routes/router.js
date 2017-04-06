@@ -28,10 +28,11 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        if (req.user.role == 'parent') {
-            res.render('pages/index', { message: '' });
-        } else {
+        if (req.user.role == 'child') {
             res.render('pages/childDashboard');
+
+        } else {
+            res.render('pages/index', { message: '' });
         }
     }
 });
