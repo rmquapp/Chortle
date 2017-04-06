@@ -28,7 +28,11 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        res.render('pages/index', { message: '' });
+        if (req.user.role == 'parent') {
+            res.render('pages/index', { message: '' });
+        } else {
+            res.render('pages/childDashboard');
+        }
     }
 });
 
@@ -54,11 +58,18 @@ router.get('/signin', function(req, res, next) {
 });
 
 // Authenticate user functionality
-router.post('/signin', passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/signin',
-    failureFlash: 'Invalid username or password'
-}));
+router.post('/signin', function(request, response, next) {
+    passport.authenticate('local')(request, response, function () {
+        response.redirect('/');
+    });
+    // {
+    //         successRedirect: '/',
+    //             failureRedirect: '/signin',
+    //         failureFlash: 'Invalid username or password'
+    //     }
+    // })
+});
+
 
 // Serve page for signup
 router.get('/signup', function(req, res, next) {
@@ -110,7 +121,7 @@ router.post('/signup', function(req, res, next) {
                 // Sign in the newly registered user
                 passport.authenticate('local')(req, res, function () {
                     res.redirect('/');
-                })
+                });
             });
         }
     });
