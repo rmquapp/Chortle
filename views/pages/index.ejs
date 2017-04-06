@@ -5,6 +5,7 @@
   <link rel="stylesheet" type="text/css" href="/stylesheets/parent-dashboard-common.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="/stylesheets/parent-dashboard-small.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (min-width: 501px)" href="/stylesheets/parent-dashboard-large.css"/>
+  <script src="/scripts/client.js"></script>
 </head>
 
 <body ng-app="parentView" ng-controller="parentViewCtrl">
@@ -33,9 +34,10 @@
               <hr>
               <ul dnd-list="list">
                   <li ng-repeat="item in list"
-                      dnd-selected="choreClicked(item, $index, listName)"
                       dnd-draggable="item"
-                      dnd-moved="list.splice($index, 1)"
+                      dnd-selected="choreClicked(item, $index, listName)"
+                      dnd-dragend="dragEndCallback(item, $index, listName)"
+                      dnd-moved="movedCallBack(item, list, $index)"
                       dnd-effect-allowed="move"> {{item.name}}</li>
               </ul>
             </div>
@@ -107,7 +109,7 @@
         <h3>Add A Child</h3>
       </div>
       <div class="modal-body">
-        <form action="/child" method="post">
+        <form id="addChildForm">
             <label><b>Child Name</b></label>
             <input type="text" placeholder="Enter Child Name" id="child-name" name="name" required autofocus>
 
@@ -120,12 +122,9 @@
             <label><b>Repeat Password</b></label>
             <input type="password" placeholder="Repeat Password" id="child-psw-repeat" name="pwdRepeat" required>
 
-            <% if (message) { %>
-              <div id="warning"><%= message %></div>
-              <script>$("#addChild").modal('show');</script>
-            <% } %>
+            <div id="warning"></div>
 
-            <button class="cancel" data-dismiss="modal" onclick="window.history.pushState('', document.title, '/');" type="button">Cancel</button>
+            <button class="cancel" data-dismiss="modal" type="button">Cancel</button>
             <button class="submit" type="Submit">Submit</button>
 
             <p><br></p>
@@ -204,6 +203,40 @@ app.controller("parentViewCtrl", function($scope, $http) {
     });  
   };
 
+  // Function that updates selected object from model in $scope.models
+  $scope.movedCallBack = function(item, list, index) {
+      list.splice(index, 1);
+      var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
+      var assigneeId = getChildId(assigneeName);
+      $scope.models.selected = [item, assigneeId];
+
+  };
+
+  // Function that takes the selected object and sends a reassigned chore in a PUT request
+  $scope.dragEndCallback = function(item, index, assignee) {
+
+      if ($scope.models.selected[1]) {
+          var newAssignee = $scope.models.selected[1];
+
+          var reassignedChore = {
+              "id": item.id,
+              "owner": newAssignee,
+              "name": item.name,
+              "description": item.description,
+              "value": item.value,
+              "status": item.status,
+          };
+
+          // Update with a puth request to API
+          $http.put("assigned_chore", reassignedChore).success( function(updatedChore) {
+              console.log("Successfully assigned chore to " + newAssignee);
+          });
+      }
+
+
+  };
+
+
   $scope.addChoreTemplate = function() {
     var newChoreTemplate =
     {
@@ -221,24 +254,6 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }).error(function(error) {
         console.log("Failed to add chore template");
     });
-  };
-
-  $scope.addChild = function() {
-    var newChild = {
-        "name": $('#child-name').val(),
-        "username": $('#child-username').val(),
-        "pwd": $('#child-psw').val(),
-        "pwdRepeat": $('#child-psw-repeat').val(),
-    };
-
-    $http.post("child", newChild).success(function(child) {
-        $('#addChild').modal('hide');
-        children.push({id: child.id, name: child.name});
-        childrenNames.push(child.name);
-    }).error(function (error) {
-        $('#warning').text(error.error);
-    });
-
   };
 
   $scope.saveChore = function() {

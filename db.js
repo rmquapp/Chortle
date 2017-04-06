@@ -2,7 +2,7 @@ var env = process.env.NODE_ENV || 'development';
 var knex = null;
 
 // Connect to local db or the heroku db
-if (env == 'development') {
+if (env === 'development') {
     knex = require('knex')({
         client: 'pg',
         // Uncomment to enable SQL query logging in console.

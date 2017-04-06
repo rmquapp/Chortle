@@ -28,7 +28,12 @@ router.get('/', function(req, res, next) {
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
-        res.render('pages/index', { message: '' });
+        if (req.user.local.role === 'child') {
+            res.render('pages/childDashboard');
+
+        } else {
+            res.render('pages/index', { message: '' });
+        }
     }
 });
 
@@ -54,11 +59,18 @@ router.get('/signin', function(req, res, next) {
 });
 
 // Authenticate user functionality
-router.post('/signin', passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/signin',
-    failureFlash: 'Invalid username or password'
-}));
+router.post('/signin', function(request, response, next) {
+    passport.authenticate('local')(request, response, function () {
+        response.redirect('/');
+    });
+    // {
+    //         successRedirect: '/',
+    //             failureRedirect: '/signin',
+    //         failureFlash: 'Invalid username or password'
+    //     }
+    // })
+});
+
 
 // Serve page for signup
 router.get('/signup', function(req, res, next) {
@@ -66,8 +78,7 @@ router.get('/signup', function(req, res, next) {
         res.redirect('/');
     } else {
         res.render('pages/signup', {
-            title: 'Sign Up',
-            message: ''
+            title: 'Sign Up'
         });
     }
 });
@@ -79,13 +90,13 @@ router.post('/signup', function(req, res, next) {
 
     // Make sure valid email address entered
     if (!validateEmail(parent.email)) {
-        res.render('pages/signup', { title: 'signup', message: 'invalid email' });
+        res.send({ success: false, error: 'invalid email address' });
         return;
     }
 
     // Make sure password typed correctly
     if (parent.password !== parent.pwdRepeat) {
-        res.render('pages/signup', { title: 'signup', message: 'password mismatch' });
+        res.send({ success: false, error: 'password mismatch' });
         return;
     }
 
@@ -94,7 +105,7 @@ router.post('/signup', function(req, res, next) {
 
     return usernamePromise.then(function(model) {
         if (model) {
-            res.render('pages/signup', { title: 'signup', message: 'username already exists' });
+            res.send({ success: false, error: 'username already exists' });
         } else {
             let password = parent.password;
             let hash = bcrypt.hashSync(password);
@@ -109,8 +120,8 @@ router.post('/signup', function(req, res, next) {
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
                 passport.authenticate('local')(req, res, function () {
-                    res.redirect('/');
-                })
+                    res.send({ success: true });
+                });
             });
         }
     });
@@ -151,7 +162,7 @@ router.get('/chores', function(request, response) {
         let choresJson = {};
         let templatesJson = [];
         let parentId = request.user.local.id;
-        //
+
         Model.getAssignedChoresParent(parentId, function (error, chores) {
             if (error) {
                 console.log(error);
@@ -160,7 +171,7 @@ router.get('/chores', function(request, response) {
                 if (chores) {
                     for ( let i = 0; i < chores.assigned_chores.length; i ++) {
                         let currentChore = chores.assigned_chores[i];
-                        if (choresJson[currentChore["name"]] == undefined) {
+                        if (choresJson[currentChore["name"]] === undefined) {
                             choresJson[currentChore["name"]] = [];
                         }
                         choresJson[currentChore["name"]].push(
@@ -607,12 +618,12 @@ router.put('/assigned_chore', function (request, response) {
  * Requires child authenticated and a form with the following:
  * {
  *  id : 2 (id of the assigned_chore)
- *  name : "Name of chore template",
- *  description : "Description of this chore template",
+ *  name : "Name of assigned chore",
+ *  description : "Description of this assigned chore",
  *  value : 20
  *  status: 'assigned'
  * }
- * It returns a json object with the chore_template that was updated
+ * It returns a json object with the assigned chore that was updated
  */
 router.put('/child/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
@@ -622,7 +633,7 @@ router.put('/child/assigned_chore', function (request, response) {
         let jsonKeys = ['id', 'name', 'description', 'value', 'status'];
         let childId = request.user.local.id;
         // Ensure id, name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
@@ -697,7 +708,26 @@ router.post('child/complete_assigned_chore/:id', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
+        let choreId = request.params.id;
+        let role = request.user.local.role;
+        if (choreId && role == 'child') {
+            Model.getAssignedChore(choreId, function (error, chore) {
+                if (error) {
+                    return response.send({error: error});
+                }
+                else {
+                    Model.setStatusAssignedChore(choreId, 'completed', function (error, message) {
+                        if (error) {
+                            return response.send({error: error});
+                        }
+                        else {
+                            response.send({assigned_chore: message});
+                        }
+                    });
 
+                }
+            })
+        }
     }
 });
 
@@ -711,7 +741,25 @@ router.post('parent/approve_assigned_chore/:id', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-
+        let choreId = request.params.id;
+        let role = request.user.local.role;
+        if (choreId && role == 'parent') {
+            Model.getAssignedChore(choreId, function (error, chore) {
+                if (error) {
+                    return response.send({error: error});
+                }
+                else {
+                    Model.setStatusAssignedChore(choreId, 'approved', function (error, message) {
+                        if (error) {
+                            return response.send({error: error});
+                        }
+                        else {
+                            response.send({assigned_chore: message});
+                        }
+                    })
+                }
+            })
+        }
     }
 });
 
@@ -758,7 +806,7 @@ router.post('/child', function(request, response) {
 
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.render('pages/index', { message: 'password mismatch' });
+            response.send({ success: false, error: 'password mismatch' });
             return;
         }
 
@@ -767,7 +815,7 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.render('pages/index', { message: 'username already exists'});
+                response.send({ success: false, error: 'username already exists' });
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
@@ -781,8 +829,7 @@ router.post('/child', function(request, response) {
                 });
 
                 newChild.save({}, {method: 'insert'}).then(function(model) {
-                    // refresh page
-                    response.redirect('/');
+                    response.send({ success: true });
                 });
             }
         });
@@ -790,56 +837,115 @@ router.post('/child', function(request, response) {
 });
 
 /*
- * via PUT https://chortle-seng513.herokuapp.com/child
- * updates a child account associated to parent logged in
+ * via GET https://chortle-seng513.herokuapp.com/child/funds
+ * returns the funds for a child
  */
-router.put('/child', function (request, response) {
+router.get('/child/funds', function(request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-
+        let childId = request.user.local.id;
+        Model.getChild(childId, function(error, child) {
+            if (error) {
+                response.send({error: error});
+            }
+            else {
+                if (child) {
+                    response.send({funds: child.piggybank});
+                }
+            }
+        });
     }
 });
 
 /*
- * via DELETE https://chortle-seng513.herokuapp.com/child
- * deletes a child account associated to parent logged in
- */
-router.delete('/child', function (request, response) {
-    if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
-    }
-    else {
-
-    }
-});
-
-/*
- * via POST https://chortle-seng513.herokuapp.com/child/add_funds
- * increases the funds of child account
+ * via PUT https://chortle-seng513.herokuapp.com/child/add_funds
+ * increases the funds of child account by the value given
  * It requires parent user to be logged in
  */
-router.post('/child/add_funds', function(request, response) {
+router.put('/child/add_funds', function(request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
+        let jsonKeys = ['childId', 'value'];
+        // Ensure values are present in the form received
+        for (let i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
 
+        // Obtain child from db, ensure it exists
+        Model.getChild(request.body.childId, function (error, oldChild) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                let newValue = parseInt(oldChild.piggybank) + request.body.value;
+
+                let newChild = new Model.Child({
+                    id: request.body.childId,
+                    name: oldChild.name,
+                    username: oldChild.username,
+                    p_id: oldChild.p_id,
+                    password: oldChild.password,
+                    piggybank: newValue,
+                });
+
+                newChild.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
     }
 });
 
 /*
- * via POST https://chortle-seng513.herokuapp.com/child/add_funds
- * decreases the funds of child account
+ * via PUT https://chortle-seng513.herokuapp.com/child/remove_funds
+ * decreases the funds of child account by the value given
  * It requires parent user to be logged in
  */
-router.post('/child/remove_funds', function(request, response) {
+router.put('/child/remove_funds', function(request, response) {
     if (!request.isAuthenticated()) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
+        let jsonKeys = ['childId', 'value'];
+        // Ensure values are present in the form received
+        for (let i = 0; i < jsonKeys.length; i++) {
+            if (!request.body.hasOwnProperty(jsonKeys[i])) {
+                return response.send({error: "Missing parameter: " + jsonKeys[i]});
+            }
+        }
 
+        // Obtain child from db, ensure it exists
+        Model.getChild(request.body.childId, function (error, oldChild) {
+            if (error) {
+                return response.send({error: error});
+            }
+            else {
+                let newValue = parseInt(oldChild.piggybank) - request.body.value;
+
+                if (newValue < 0) {
+                    return response.send({error: 'insufficient funds'});
+                }
+
+                let newChild = new Model.Child({
+                    id: request.body.childId,
+                    name: oldChild.name,
+                    username: oldChild.username,
+                    p_id: oldChild.p_id,
+                    password: oldChild.password,
+                    piggybank: newValue,
+                });
+
+                newChild.save({}, {method: 'update'}).then ( function (model) {
+                    response.json(model);
+                });
+            }
+        });
     }
 });
 
@@ -878,7 +984,7 @@ router.post('/chores', function(req, res, next) {
         });
 
 
-        var assignedChore = new Model.AssignedChore({
+        let assignedChore = new Model.AssignedChore({
             owner       : choreToCreate.owner,
             name        : choreToCreate.name,
             description : choreToCreate.description,

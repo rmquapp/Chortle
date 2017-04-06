@@ -25,14 +25,10 @@
                 <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
                 <label for="password" class="sr-only">Password</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" value="remember-me"> Remember me
-                    </label>
-                </div>
                 <% if (message) { %>
                     <div id="warning"><%= message %></div>
                 <% } %>
+                <p><br></p>
                 <button class="btn btn-lg btn-default btn-block" type="submit">Sign in</button>
             </form>
             <div id="register-link">Don't have an account? Create one <a class="link" href="/signup">here</a>.</div>

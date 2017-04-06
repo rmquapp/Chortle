@@ -91,7 +91,7 @@ function createNewChild(callback) {
 
 
 function grabChildCredentials(childId, callback) {
-    var loginChild = {
+    let loginChild = {
         local: {
             username: null,
             password: null,
@@ -112,7 +112,7 @@ function grabChildCredentials(childId, callback) {
            loginChild.local.username    = row.username;
            loginChild.local.password    = row.password;
            loginChild.local.id          = row.id;
-           loginChild.local.parent      = 'child';
+           loginChild.local.role      = 'child';
            callback(null, loginChild);
        }
     });
@@ -133,9 +133,9 @@ function createNewChoreTemplate(callback) {
 }
 
 function grabChildrenFromParent(parentId, callback) {
-    var childrenFromParent = [];
+    let childrenFromParent = [];
 
-    knex.select('child.id', 'child.name')
+    knex.select('child.id', 'child.name', 'child.piggybank')
         .from('child')
         .where('child.p_id', '=', parentId).then( function (row) {
             if (row.length <= 0) {
@@ -272,6 +272,38 @@ function deleteChoreTemplate(choreId, callback) {
             }
         });
 }
+
+function getChild(childId, callback) {
+
+    knex.select('child.id', 'child.username', 'child.name', 'child.p_id',
+        'child.piggybank')
+        .from('child')
+        .where('child.id', '=', childId)
+        .then ( function (row) {
+            if (row.length <= 0) {
+                callback('Could not find child', null);
+            }
+            else {
+                callback(null, row[0]);
+            }
+        });
+}
+
+function setStatusAssignedChore(choreId, status, callback) {
+
+    knex('assigned_chore')
+        .where('assigned_chore.id', '=', choreId)
+        .update({status: status})
+        .then( function (row) {
+            if (row.length <=0) {
+                callback('Could not update assigned chore', null);
+            }
+            else {
+                callback(null, " assigned chore with id " + choreId + " was updated");
+            }
+        })
+}
+
 module.exports = {
     createNewParent         : createNewParent,
     grabParentCredentials   : grabParentCredentials,
@@ -287,6 +319,8 @@ module.exports = {
     deleteChoreTemplate     : deleteChoreTemplate,
     getAssignedChore        : getAssignedChore,
     deleteAssignedChore     : deleteAssignedChore,
+    getChild                : getChild,
+    setStatusAssignedChore   : setStatusAssignedChore,
     Parent                  : Parent,
     AssignedChore           : AssignedChore,
     ChoreTemplate           : ChoreTemplate,
