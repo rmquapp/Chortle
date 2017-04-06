@@ -388,7 +388,7 @@ router.delete('/chore_template/:id', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-        let choreId = request.params.id;
+        let choreId = request.params.id.substr(1);
         let parentId = request.user.local.id;
         if (choreId) {
             Model.getChoreTemplate(choreId, function (error, oldChoreTemplate) {
@@ -662,7 +662,7 @@ router.delete('/assigned_chore/:id', function (request, response) {
         response.send({error: ERROR.NOT_LOGGED});
     }
     else {
-        let choreId = request.params.id;
+        let choreId = request.params.id.substr(1);
         let role = request.user.local.role;
         if (choreId && role === 'parent') {
             Model.getAssignedChore(choreId, function (error, oldChoreTemplate) {
