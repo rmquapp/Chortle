@@ -93,3 +93,12 @@ html, body{
     list-style: none;
     margin: 0;
 }
+
+/* http://stackoverflow.com/questions/735394/add-image-to-left-of-text-via-css */
+.kid-list ul[dnd-list] li.background-completed {
+    background-image: url('/images/circle.png');
+    background-repeat: no-repeat;
+    background-position: left;
+    padding-left: 30px;  /* width of the image plus a little extra padding */
+    display: block;
+}

@@ -710,7 +710,7 @@ router.post('child/complete_assigned_chore/:id', function (request, response) {
     else {
         let choreId = request.params.id;
         let role = request.user.local.role;
-        if (choreId && role == 'child') {
+        if (choreId && role === 'child') {
             Model.getAssignedChore(choreId, function (error, chore) {
                 if (error) {
                     return response.send({error: error});
@@ -743,7 +743,7 @@ router.post('parent/approve_assigned_chore/:id', function (request, response) {
     else {
         let choreId = request.params.id;
         let role = request.user.local.role;
-        if (choreId && role == 'parent') {
+        if (choreId && role === 'parent') {
             Model.getAssignedChore(choreId, function (error, chore) {
                 if (error) {
                     return response.send({error: error});

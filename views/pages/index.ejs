@@ -35,10 +35,14 @@
               <ul dnd-list="list">
                   <li ng-repeat="item in list"
                       dnd-draggable="item"
+                      dnd-type="item.status"
                       dnd-selected="choreClicked(item, $index, listName)"
                       dnd-dragend="dragEndCallback(item, $index, listName)"
                       dnd-moved="movedCallBack(item, list, $index)"
-                      dnd-effect-allowed="move"> {{item.name}}</li>
+                      dnd-effect-allowed="move"
+                      class="background-{{item.status}}">
+                          {{item.name}}
+                  </li>
               </ul>
             </div>
             <div class="kid-bank">
@@ -165,10 +169,10 @@ app.controller("parentViewCtrl", function($scope, $http) {
     success(function(response) {
       children = response["children"];
       $scope.children = {};
-      var childInfo;
-      for (var i = 0; i < children.length; i++) {
-        var child = children[i];
-        var name = child["name"];
+      let childInfo;
+      for (let i = 0; i < children.length; i++) {
+        let child = children[i];
+        let name = child["name"];
 
         childInfo = {
           "id": child["id"],
@@ -205,8 +209,8 @@ app.controller("parentViewCtrl", function($scope, $http) {
       console.log("Successfully assigned chore");
 
       // Update ID to reflect database
-      var chores = $scope.models.lists[assigneeName];
-      for (var i in chores) {
+      let chores = $scope.models.lists[assigneeName];
+      for (let i in chores) {
         if (chores[i]["id"] === item["id"]) {
           $scope.models.lists[assigneeName][i]["id"] = chore["id"];
         }
@@ -219,10 +223,9 @@ app.controller("parentViewCtrl", function($scope, $http) {
   // Function that updates selected object from model in $scope.models
   $scope.movedCallBack = function(item, list, index) {
       list.splice(index, 1);
-      var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
-      var assigneeId = getChildId(assigneeName);
+      let assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
+      let assigneeId = getChildId(assigneeName);
       $scope.models.selected = [item, assigneeId];
-
   };
 
   // Function that takes the selected object and sends a reassigned chore in a PUT request
