@@ -754,6 +754,8 @@ router.get('/child', function(request, response) {
     }
 });
 
+
+
 /*
  * via POST https://chortle-seng513.herokuapp.com/child
  * creates a child account and associates this to parent logged in
@@ -958,25 +960,6 @@ router.post('/chores', function(req, res, next) {
         assignedChore.save({}, {method: 'insert'}).then(function(model) {
 
             res.json(assignedChore);
-        });
-    }
-});
-
-
-// Get the children from the child table
-router.get('/children', function(request, response) {
-    if (!request.isAuthenticated()) {
-        response.redirect('/signin');
-    } else {
-        Model.grabChildrenFromParent(1, function (error, data) {
-            if (error) {
-                response.send({error: error});
-            }
-            else {
-                if (data) {
-                    response.send({children: data});
-                }
-            }
         });
     }
 });
