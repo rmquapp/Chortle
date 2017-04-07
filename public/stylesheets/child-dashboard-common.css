@@ -244,3 +244,7 @@ html, body{
 
 .approval-chore-name{
 }
+
+#add-child {
+    display: none;
+}
