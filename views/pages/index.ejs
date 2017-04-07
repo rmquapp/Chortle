@@ -35,10 +35,14 @@
               <ul dnd-list="list">
                   <li ng-repeat="item in list"
                       dnd-draggable="item"
+                      dnd-type="item.status"
                       dnd-selected="choreClicked(item, $index, listName)"
                       dnd-dragend="dragEndCallback(item, $index, listName)"
                       dnd-moved="movedCallBack(item, list, $index)"
-                      dnd-effect-allowed="move"> {{item.name}}</li>
+                      dnd-effect-allowed="move"
+                      class="background-{{item.status}}">
+                      {{item.name}}
+                  </li>
               </ul>
             </div>
             <div class="kid-bank" ng-click="showPiggybankModal(listName)">
@@ -89,6 +93,11 @@
         </br>
         <select id="selectChild">
         </select>
+         <div id="approve">
+                 <section class="input-group">
+                    <button id="js-trigger-overlay approve-button" ng-click="approveChore()" type="button">Approve</button>
+                 </section>
+         </div>
       </div>
       <div class="modal-footer">
         <button id="delete-button" ng-click="deleteChore()" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
@@ -212,11 +221,11 @@ app.controller("parentViewCtrl", function($scope, $http) {
 
   $scope.linkedCallback = function(item) {
     // Find out who the chore was assigned to using the ID
-    var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
-    var assigneeId = getChildId(assigneeName);
+    let assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
+    let assigneeId = getChildId(assigneeName);
 
     // Insert new chore into database
-    var newChore =
+    let newChore =
     {
       "owner": parseInt(assigneeId),
       "name": item['name'],
@@ -230,8 +239,8 @@ app.controller("parentViewCtrl", function($scope, $http) {
       console.log("Successfully assigned chore");
 
       // Update ID to reflect database
-      var chores = $scope.models.lists[assigneeName];
-      for (var i in chores) {
+      let chores = $scope.models.lists[assigneeName];
+      for (let i in chores) {
         if (chores[i]["id"] === item["id"]) {
           $scope.models.lists[assigneeName][i]["id"] = chore["id"];
         }
@@ -270,8 +279,6 @@ app.controller("parentViewCtrl", function($scope, $http) {
               console.log("Successfully assigned chore to " + newAssignee);
           });
       }
-
-
   };
 
 
@@ -309,7 +316,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }
 
     var list;
-    if (assignee == "Unassigned") {
+    if (assignee === "Unassigned") {
       list = $scope.models.template;
     }
     else {
@@ -317,19 +324,19 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }
 
     for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
+      if (list[i] === item) {
         newAssignee = $('#selectChild').val() || "Unassigned";
 
         var childId =  getChildId(newAssignee);
         editedChore["owner"] = childId;
 
         // If the assignee has not been changed, update the chore
-        if (assignee == newAssignee) {
+        if (assignee === newAssignee) {
           list[i] = editedChore;
         }
         // If the assignee has changed, move the updated chore
         else {
-          if (assignee != "Unassigned") {
+          if (assignee !== "Unassigned") {
             list.splice(i, 1);
           }
           else {
@@ -343,7 +350,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     $('#edit-chore-modal').modal('hide');
 
     // Update chore in database
-    if (newAssignee == "Unassigned") {
+    if (newAssignee === "Unassigned") {
       // Update chore template
       $http.put("chore_template", editedChore).success(function(response) {
       }).error(function(error) {
@@ -390,6 +397,12 @@ app.controller("parentViewCtrl", function($scope, $http) {
         opt.innerHTML = "&nbsp&nbsp" + children[i] + "&nbsp&nbsp&nbsp&nbsp&nbsp";
         select.appendChild(opt);
     }
+
+      if (item["status"] === 'completed') {
+          document.getElementById('approve').classList.toggle("show");
+      } else {
+          document.getElementById('approve').classList.remove("show");
+      }
   }
 
   $scope.deleteChore = function() {
@@ -398,7 +411,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     var item = $scope.models.selected[0];
 
     var list;
-    if (assignee == "Unassigned") {
+    if (assignee === "Unassigned") {
       list = $scope.models.template;
     }
     else {
@@ -406,7 +419,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }
 
     for (var i = 0; i < list.length; i++) {
-      if (list[i] == item) {
+      if (list[i] === item) {
         list.splice(i, 1);
         break;
       }
@@ -414,7 +427,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
     $('#edit-chore-modal').modal('hide');
 
     // Delete from database
-    if (assignee == "Unassigned") {
+    if (assignee === "Unassigned") {
       // Delete chore template from database
       $http.delete("/chore_template/:" + item.id, item).success(function(response) {
       }).error(function(error) {
@@ -430,6 +443,26 @@ app.controller("parentViewCtrl", function($scope, $http) {
     }
   }
 
+  $scope.approveChore = function () {
+     let assignee = $scope.models.selected[1];
+     let item = $scope.models.selected[0];
+     let childId = getChildId(assignee);
+
+     $('#edit-chore-modal').modal('hide');
+
+         $http.put("/child/add_funds", {childId: childId, value: parseInt(item.value)})
+         .success(function(data) {
+                 if ( data.success) {
+                         window.location = '/';
+                     }
+             })
+         .error(function (error) {
+                 console.log("Failed to add assigned chore");
+             });
+
+      $scope.deleteChore();
+  }
+
   $scope.showPiggybankModal = function(listName) {
     selectedBankChildname = listName;
 
@@ -441,7 +474,7 @@ app.controller("parentViewCtrl", function($scope, $http) {
   }
 
   $scope.emptyPiggybank = function() {
-    if (selectedBankChildname != null) {
+    if (selectedBankChildname !== null) {
       var childId = getChildId(selectedBankChildname);
       var value = document.getElementById("cashoutValue").value;
       var data = {
