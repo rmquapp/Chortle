@@ -5,53 +5,87 @@
 (function (angular) {
     'use strict';
     let app = angular.module("childDashboard", ['dndLists', 'ngRoute']);
-    app.controller("childDashboardCtrl", function ($scope, service) {
+    app.controller("childDashboardCtrl", function ($scope, $http) {
+
         $scope.models = {
             selected: null,
-            choreList: [
-                {name:"Chore 1", selected:true},
-                {name:"Chore 2"}
-                ],
+            choreList: [],
+            pendingApprovalList: [],
+            funds: 0
         };
 
-
-        $scope.$watch('models.choreList', function(model) {
-            $scope.modelAsJson = angular.toJson(model, true);
-        }, true);
-        // $scope.$watch(
-        //     function combinedWatch() {
-        //         return {
-        //             models: {
-        //                 selected: $scope.models.selected,
-        //                 choreList: $scope.models.choreList,
-        //             }
-        //     };
-        // }, function (value) {
-        //     if (!value.models.choreList) {
-        //         // $scope.models.choreList = [];
-        //         // let promise = service.getHistoricalDataWithQ();
-        //         // promise.then(function (data) {
-        //         //     $scope.models.choreList = data.choreList;
-        //         // });
-        //     }
-        // }, true);
-    });
-// http://stackoverflow.com/questions/14154767/angular-js-refresh-service-inside-a-controller
-    app.factory('service', function ($q, $http) {
-        return {
-// return a promise to controller
-            getHistoricalDataWithQ: function () {
-                let deferred = $q.defer();
-                let url = 'https://chortle-seng513.herokuapp.com/chores';
-                $http.get(url)
-                    .success(function (data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function (error) {
-                        console.log(JSON.stringify(error));
-                    });
-                return deferred.promise;
+        $scope.updateChecked = function(checked, chore) {
+            let status = 'completed';
+            if(checked) {
+                status = 'completed';
+            } else {
+                status = 'assigned';
             }
-        }
+                let data = {
+                    id : chore.id,
+                    name : chore.name,
+                    description : chore.description,
+                    value : chore.value,
+
+                    status: status
+                }
+            $http.put('/child/assigned_chore',data)
+                .success(function (data) {
+                    $scope.loadData();
+                })
+                .error(function (error) {
+                    console.log("Error updating child assigned_chore endpoint");
+                });
+        };
+
+        $scope.loadData = function () {
+            $http.get('child/assigned_chore').
+            success(function(response) {
+                let assigned_chores = response["assigned_chores"];
+                $scope.models.pendingApprovalList = [];
+                $scope.models.choreList = [];
+                for (let i = 0; i < assigned_chores.length; i++) {
+                    let chore = {
+                        id:assigned_chores[i]["id"],
+                        name:assigned_chores[i]["name"],
+                        description:assigned_chores[i]["description"],
+                        value:assigned_chores[i]["value"],
+                        status:assigned_chores[i]["status"]
+                    };
+                    if(assigned_chores[i]["status"] === "completed"){
+                        chore.checked = true;
+                        $scope.models.pendingApprovalList.push(chore);
+                    } else {
+                        $scope.models.choreList.push(chore);
+                    }
+                    // ensures the same chore is selected on a re-fetch
+                    if($scope.models.selected != null && $scope.models.selected.id == chore.id){
+                        $scope.models.selected = chore;
+                    }
+                }
+                if($scope.models.selected == null){
+                    if($scope.models.choreList.length > 0) {
+                        $scope.models.selected = $scope.models.choreList[0];
+                    } else if($scope.models.pendingApprovalList.length > 0){
+                        $scope.models.selected = $scope.models.pendingApprovalList[0];
+                    }
+                }
+            }).
+            error(function(error) {
+                console.log("Error accessing child assigned chores endpoint");
+            });
+
+            $http.get('/child/funds').
+            success(function(response) {
+                $scope.models.funds = response["funds"];
+            }).
+            error(function(error) {
+                console.log("Error accessing child funds endpoint");
+            });
+        };
+
+        //initial load
+        $scope.loadData();
     });
+
 })(window.angular);

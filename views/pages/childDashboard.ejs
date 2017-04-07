@@ -24,24 +24,26 @@
         </li>
       </ul>
     </div><!-- chore-list -->
-  <div class="chore-detail-container">
-    <div class="chore-title">Feed the Cats</div>
+  <div ng-if="models.selected" class="chore-detail-container">
+    <div class="chore-title">{{models.selected.name}}</div>
     <div class="description-label chore-label">Description</div>
-    <div class="chore-description">
-        Every day at 6:00 pm, give wet food to the cats.
-        Remember to clean-up any mess caused.
-        Don't let Toulouse steal Ruby's food.
-    </div>
-
+    <div class="chore-description">{{models.selected.description}}</div>
     <div class="chore-value-row">
       <div class="chore-label">Value</div>
-      <div class="chore-row-value chore-value">$4</div>
+      <div class="chore-row-value chore-value">${{models.selected.value}}</div>
     </div>
 
     <div class="chore-value-row">
       <div class="chore-finished chore-label">Finished Chore</div>
       <div class="chore-row-value checkbox complete-checkbox">
-        <label><input type="checkbox" value="chore-complete"></label>
+        <label><input
+                  ng-model="models.selected.checked"
+                  ng-change="updateChecked(models.selected.checked, models.selected)"
+                  ng-checked="models.selected.checked"
+
+                  type="checkbox"
+                  value="chore-complete">
+        </label>
       </div>
 
     </div>
@@ -49,7 +51,7 @@
     <div class="chore-value-row">
       <div class="chore-status chore-label">Status</div>
       <div class="chore-row-value chore-status-value">
-        Complete
+        {{models.selected.status}}
       </div>
     </div>
   </div><!-- chore-detail-container -->
@@ -58,18 +60,14 @@
       <div class="chore-approval-label">Chores Waiting for Approval</div>
       <div class="chore-approval-inner">
         <div class="chore-approval-list-container">
-          <ul class="list-unstyled chore-approval-list">
-            <li>
-              <div class="approval-chore-amount">$10</div>
-              <div class="approval-chore-name">Chore 1 Is a longer chore with a longer name, i dunno why?</div>
-            </li>
-            <li>
-              <span class="approval-chore-amount">$15</span>
-              <span class="approval-chore-name">Chore 2</span>
-            </li>
-            <li>
-              <span class="approval-chore-amount">$5</span>
-              <span class="approval-chore-name">Chore 3</span>
+          <ul  class="list-unstyled chore-approval-list">
+            <li ng-repeat="item in models.pendingApprovalList"
+                dnd-draggable="none"
+                dnd-disable-if ="true"
+                dnd-selected="models.selected = item"
+                ng-class="{selected: models.selected === item}">
+              <div class="approval-chore-amount">${{item.value}}</div>
+              <div class="approval-chore-name">{{item.name}}</div>
             </li>
           </ul>
         </div><!-- chore-approval-list-container -->
@@ -80,7 +78,7 @@
     </div> <!-- approval-container -->
     <div class="balance-container">
       <div class="piggybank-balance-label">Piggy Bank Balance</div>
-      <div class="piggy-bank-balance"><div class="bank-amount">$48</div></div>
+      <div class="piggy-bank-balance"><div class="bank-amount">${{models.funds}}</div></div>
     </div> <!-- balance-container -->
   </div> <!-- approval-balance-container -->
 
