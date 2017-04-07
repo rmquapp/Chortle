@@ -36,7 +36,14 @@
     <div class="chore-value-row">
       <div class="chore-finished chore-label">Finished Chore</div>
       <div class="chore-row-value checkbox complete-checkbox">
-        <label><input type="checkbox" value="chore-complete"></label>
+        <label><input
+                  ng-model="models.selected.checked"
+                  ng-change="updateChecked(models.selected.checked, models.selected)"
+                  ng-checked="models.selected.checked"
+
+                  type="checkbox"
+                  value="chore-complete">
+        </label>
       </div>
 
     </div>
