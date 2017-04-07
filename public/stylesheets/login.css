@@ -102,3 +102,8 @@ html, body{
 #login-submit {
     margin-top: 10px;
 }
+
+#username, #password{
+    padding-top: 0;
+    padding-bottom: 0;
+}
