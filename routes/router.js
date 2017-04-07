@@ -39,7 +39,6 @@ router.get('/', function(req, res, next) {
 
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/childDashboard', function(req, res, next) {
-    res.render('pages/childDashboard');
     if (!req.isAuthenticated()) {
         res.redirect('/signin');
     } else {
