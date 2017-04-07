@@ -102,3 +102,7 @@ html, body{
     padding-left: 30px;  /* width of the image plus a little extra padding */
     display: block;
 }
+
+#approve {
+    display: none;
+}
