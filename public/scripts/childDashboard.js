@@ -26,7 +26,6 @@
                     name : chore.name,
                     description : chore.description,
                     value : chore.value,
-
                     status: status
                 }
             $http.put('/child/assigned_chore',data)
@@ -50,7 +49,7 @@
                         name:assigned_chores[i]["name"],
                         description:assigned_chores[i]["description"],
                         value:assigned_chores[i]["value"],
-                        status:assigned_chores[i]["status"]
+                        status: $scope.formatStatus(assigned_chores[i]["status"])
                     };
                     if(assigned_chores[i]["status"] === "completed"){
                         chore.checked = true;
@@ -86,6 +85,15 @@
 
         //initial load
         $scope.loadData();
+
+        $scope.formatStatus = function(status){
+            switch(status){
+                case 'completed':
+                    return "Pending Approval";
+                case 'assigned':
+                    return "To Be Completed";
+            }
+        }
     });
 
 })(window.angular);
