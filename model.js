@@ -138,15 +138,10 @@ function grabChildrenFromParent(parentId, callback) {
     knex.select('child.id', 'child.name', 'child.piggybank')
         .from('child')
         .where('child.p_id', '=', parentId).then( function (row) {
-            if (row.length <= 0) {
-                callback('Could not find children for parent', null);
+            for (let i = 0; i < row.length; i++) {
+                childrenFromParent.push(row[i]);
             }
-            else {
-                for (var i = 0; i < row.length; i++) {
-                    childrenFromParent.push(row[i]);
-                }
-                callback(null, childrenFromParent);
-            }
+            callback(null, childrenFromParent);
     })
 }
 /*
@@ -160,15 +155,10 @@ function getAssignedChoreChild(childId, callback) {
     knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value', 'assigned_chore.status')
         .from('assigned_chore')
         .where('assigned_chore.owner', '=', childId). then ( function (row) {
-            if (row.length <= 0) {
-                callback('Could not find assigned chores for child', null);
+            for (let i = 0; i < row.length; i++) {
+                assignedChores.push(row[i]);
             }
-            else {
-                for (var i = 0; i < row.length; i++) {
-                    assignedChores.push(row[i]);
-                }
-                callback(null, {assigned_chores: assignedChores});
-            }
+            callback(null, {assigned_chores: assignedChores});
     });
 }
 
@@ -180,15 +170,10 @@ function getAssignedChoresParent(parentId, callback) {
         .from('assigned_chore').leftOuterJoin('child', 'child.id', 'assigned_chore.owner')
         .where('child.p_id', '=', parentId)
         .then ( function (row) {
-        if (row.length <= 0) {
-            callback('Could not find assigned chores', null);
-        }
-        else {
             for (var i = 0; i < row.length; i++) {
                 assignedChores.push(row[i]);
             }
             callback(null, {assigned_chores: assignedChores});
-        }
     });
 }
 
@@ -202,7 +187,7 @@ function getAssignedChore(choreId, callback) {
         .where('assigned_chore.id', '=', choreId)
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find assigned chores', null);
+                callback(null, null);
             }
             else {
                 callback(null, row[0]);
@@ -216,7 +201,7 @@ function deleteAssignedChore(choreId, callback) {
         .del()
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find assigned chore', null);
+                callback(null, null);
             }
             else {
                 callback(null, "assigned_chore with id " + choreId + " deleted");
@@ -234,7 +219,7 @@ function getChoreTemplateParent(parentId, callback) {
         .where('chore_template.owner', '=', parentId)
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find chores template', null);
+                callback(null, null);
             }
             else {
                 callback(null, {chore_template: row});
@@ -250,7 +235,7 @@ function getChoreTemplate(choreId, callback) {
         .where('chore_template.id', '=', choreId)
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find chores template', null);
+                callback(null, null);
             }
             else {
                 callback(null, row[0]);
@@ -265,7 +250,7 @@ function deleteChoreTemplate(choreId, callback) {
         .del()
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find chores template', null);
+                callback(null, null);
             }
             else {
                 callback(null, " chore_template with id " + choreId + " deleted");
@@ -281,7 +266,7 @@ function getChild(childId, callback) {
         .where('child.id', '=', childId)
         .then ( function (row) {
             if (row.length <= 0) {
-                callback('Could not find child', null);
+                callback(null, null);
             }
             else {
                 callback(null, row[0]);
