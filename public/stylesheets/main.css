@@ -156,6 +156,10 @@ textarea {
   width: 100%;
 }
 
+#cashoutValue {
+  width: 85px;
+}
+
 #add-chore-title {
   background-color: transparent;
   border: 0px solid;
@@ -168,6 +172,11 @@ textarea {
   background-color: transparent;
   border: 0px solid;
   font-size: 1.5em;
+  padding: 0;
+  margin: 0;
+}
+
+#piggybank-modal-title {
   padding: 0;
   margin: 0;
 }

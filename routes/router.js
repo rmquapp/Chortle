@@ -744,32 +744,15 @@ router.get('/child', function(request, response) {
             }
             else {
                 if (data) {
-                    let sortedData = sortObject(data);
-                    response.send({children: sortedData});
+                    let sorted = data.sort(function(a, b) {
+                        return a.name.localeCompare(b.name);
+                    });
+                    response.send({children: sorted});
                 }
             }
         });
     }
 });
-
-// http://stackoverflow.com/questions/1359761/sorting-a-javascript-object-by-property-name
-function sortObject(o) {
-    let sorted = {},
-        key, a = [];
-
-    for (key in o) {
-        if (o.hasOwnProperty(key)) {
-            a.push(key);
-        }
-    }
-
-    a.sort();
-
-    for (key = 0; key < a.length; key++) {
-        sorted[a[key]] = o[a[key]];
-    }
-    return sorted;
-}
 
 /*
  * via POST https://chortle-seng513.herokuapp.com/child
