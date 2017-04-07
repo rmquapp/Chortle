@@ -377,7 +377,6 @@
             if (item["status"] === 'completed') {
                 document.getElementById('approve').classList.toggle("show");
             } else {
-                console.log("hide");
                 document.getElementById('approve').classList.remove("show");
             }
         }
@@ -421,7 +420,23 @@
         }
 
         $scope.approveChore = function () {
+            let assignee = $scope.models.selected[1];
+            let item = $scope.models.selected[0];
+            let childId = getChildId(assignee);
 
+            $('#edit-chore-modal').modal('hide');
+
+            $http.put("/child/add_funds", {childId: childId, value: parseInt(item.value)})
+                .success(function(data) {
+                    if ( data.success) {
+                        window.location = '/';
+                    }
+                })
+                .error(function (error) {
+                    console.log("Failed to add assigned chore");
+                });
+
+            $scope.deleteChore();
         }
     })
     ;

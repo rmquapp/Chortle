@@ -732,39 +732,6 @@ router.post('child/complete_assigned_chore/:id', function (request, response) {
 });
 
 /*
- * via POST https://chortle-seng513.herokuapp.com/parent/approve_assigned_chore/:id
- * set assigned_chore to be approved
- * It requires parent user to be logged in
- */
-router.post('parent/approve_assigned_chore/:id', function (request, response) {
-    if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
-    }
-    else {
-        let choreId = request.params.id;
-        let role = request.user.local.role;
-        if (choreId && role === 'parent') {
-            Model.getAssignedChore(choreId, function (error, chore) {
-                if (error) {
-                    return response.send({error: error});
-                }
-                else {
-                    Model.setStatusAssignedChore(choreId, 'approved', function (error, message) {
-                        if (error) {
-                            return response.send({error: error});
-                        }
-                        else {
-                            response.send({assigned_chore: message});
-                        }
-                    })
-                }
-            })
-        }
-    }
-});
-
-
-/*
  * Child object endpoints
  *
  */
@@ -895,7 +862,7 @@ router.put('/child/add_funds', function(request, response) {
                 });
 
                 newChild.save({}, {method: 'update'}).then ( function (model) {
-                    response.json(model);
+                    response.send({success: true});
                 });
             }
         });
