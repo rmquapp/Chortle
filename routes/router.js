@@ -224,7 +224,7 @@ router.get('/chores', function(request, response) {
 // router.post('/chore_template') should be used instead to conform with naming convention for chore_template resource
 router.post('/chore-template', function(req, res, next) {
     if (!req.isAuthenticated()) {
-        res.redirect(307, '/');
+        res.redirect('/signin');
     }
     else {
         var jsonKeys = ['owner', 'name', 'description', 'value'];
@@ -271,7 +271,7 @@ router.post('/chore-template', function(req, res, next) {
  */
 router.get('/chore_template', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let parentId = request.user.local.id;
@@ -300,7 +300,7 @@ router.get('/chore_template', function(request, response) {
  */
 router.post('/chore_template', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['name', 'description', 'value'];
@@ -341,7 +341,7 @@ router.post('/chore_template', function (request, response) {
  */
 router.put('/chore_template', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['id', 'name', 'description', 'value'];
@@ -359,7 +359,7 @@ router.put('/chore_template', function (request, response) {
                 return response.send({error: error});
             }
             else {
-                if (oldChoreTemplate.owner != parentId) {
+                if (oldChoreTemplate.owner !== parentId) {
                     return response.send({error: ERROR.NOT_AUTHORIZED});
                 }
                 else {
@@ -389,7 +389,7 @@ router.put('/chore_template', function (request, response) {
  */
 router.delete('/chore_template/:id', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let choreId = request.params.id.substr(1);
@@ -442,7 +442,7 @@ router.delete('/chore_template/:id', function (request, response) {
  */
 router.get('/parent/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let parentId = request.user.local.id;
@@ -474,7 +474,7 @@ router.get('/parent/assigned_chore', function (request, response) {
  */
 router.get('/child/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let childId = request.user.local.id;
@@ -505,7 +505,7 @@ router.get('/child/assigned_chore', function (request, response) {
  */
 router.post('/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['name', 'owner', 'description', 'value', 'status'];
@@ -571,7 +571,7 @@ router.post('/assigned_chore', function (request, response) {
  */
 router.put('/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
 
@@ -620,7 +620,7 @@ router.put('/assigned_chore', function (request, response) {
  */
 router.put('/child/assigned_chore', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['id', 'name', 'description', 'value', 'status'];
@@ -663,7 +663,7 @@ router.put('/child/assigned_chore', function (request, response) {
  */
 router.delete('/assigned_chore/:id', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let choreId = request.params.id.substr(1);
@@ -698,7 +698,7 @@ router.delete('/assigned_chore/:id', function (request, response) {
  */
 router.post('child/complete_assigned_chore/:id', function (request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let choreId = request.params.id;
@@ -734,7 +734,7 @@ router.post('child/complete_assigned_chore/:id', function (request, response) {
 */
 router.get('/child', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.render('pages/signin');
+        response.redirect('/signin');
     }
     else {
         let parentId = request.user.local.id;
@@ -777,7 +777,7 @@ function sortObject(o) {
  */
 router.post('/child', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.render('pages/signin');
+        response.redirect('/signin');
     }
     else {
         // Here, req.body is { name, username, pwd, pwdRepeat }
@@ -822,7 +822,7 @@ router.post('/child', function(request, response) {
  */
 router.get('/child/funds', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let childId = request.user.local.id;
@@ -846,7 +846,7 @@ router.get('/child/funds', function(request, response) {
  */
 router.put('/child/add_funds', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['childId', 'value'];
@@ -889,7 +889,7 @@ router.put('/child/add_funds', function(request, response) {
  */
 router.put('/child/remove_funds', function(request, response) {
     if (!request.isAuthenticated()) {
-        response.send({error: ERROR.NOT_LOGGED});
+        response.redirect('/signin');
     }
     else {
         let jsonKeys = ['childId', 'value'];
@@ -933,7 +933,7 @@ router.put('/child/remove_funds', function(request, response) {
 // Function to create chores
 router.post('/chores', function(req, res, next) {
     if (!req.isAuthenticated()) {
-        res.redirect(307, '/');
+        res.redirect('/signin');
     }
     else {
         var jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
@@ -982,19 +982,20 @@ router.post('/chores', function(req, res, next) {
 
 // Get the children from the child table
 router.get('/children', function(request, response) {
-    var children = [];
-
-    Model.grabChildrenFromParent(1, function(error, data) {
-        if (error) {
-            response.send({error: error});
-        }
-        else {
-            if (data) {
-                response.send({children: data});
+    if (!request.isAuthenticated()) {
+        response.redirect('/signin');
+    } else {
+        Model.grabChildrenFromParent(1, function (error, data) {
+            if (error) {
+                response.send({error: error});
             }
-        }
-    });
-
+            else {
+                if (data) {
+                    response.send({children: data});
+                }
+            }
+        });
+    }
 });
 
 router.get('/images/piggy-bank.png', function(request, response) {
