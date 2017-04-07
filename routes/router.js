@@ -40,11 +40,11 @@ router.get('/', function(req, res, next) {
 // Serve the sign in form if not authenticated, otherwise show the main page
 router.get('/childDashboard', function(req, res, next) {
     res.render('pages/childDashboard');
-    // if (req.isAuthenticated()) {
-    //     res.render('/');
-    // } else {
-    //     res.render('pages/login');
-    // }
+    if (!req.isAuthenticated()) {
+        res.redirect('/signin');
+    } else {
+        res.render('pages/childDashboard');
+    }
 });
 
 // Serve the sign in form if not authenticated, otherwise show the main page
@@ -59,17 +59,11 @@ router.get('/signin', function(req, res, next) {
 });
 
 // Authenticate user functionality
-router.post('/signin', function(request, response, next) {
-    passport.authenticate('local')(request, response, function () {
-        response.redirect('/');
-    });
-    // {
-    //         successRedirect: '/',
-    //             failureRedirect: '/signin',
-    //         failureFlash: 'Invalid username or password'
-    //     }
-    // })
-});
+router.post('/signin', passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/signin',
+        failureFlash: "invalid username or password"
+}));
 
 
 // Serve page for signup

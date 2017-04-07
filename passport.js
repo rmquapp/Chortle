@@ -28,11 +28,10 @@ module.exports = function(passport) {
                 // Parent not found, attempt to find child
                 new Model.Child({username: username}).fetch().then(function(data) {
                     let child = data;
-                    if (child == null) {
+                    if (child === null) {
                         return done(null, false, { message: 'Invalid username or password' });
                     }
                     else {
-
                         child = data.toJSON();
                         child.role = 'child';
                         if (!bcrypt.compareSync(password, child.password)) {
