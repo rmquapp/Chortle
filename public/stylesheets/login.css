@@ -98,3 +98,7 @@ html, body{
 #register-link{
     margin-bottom: 40px;
 }
+
+#login-submit {
+    margin-top: 10px;
+}
