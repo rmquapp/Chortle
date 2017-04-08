@@ -1,5 +1,5 @@
-var env = process.env.NODE_ENV || 'development';
-var knex = null;
+let env = process.env.NODE_ENV || 'development';
+let knex = null;
 
 // Connect to local db or the heroku db
 if (env === 'development') {
@@ -23,6 +23,6 @@ if (env === 'development') {
 }
 
 
-var DB = require('bookshelf')(knex);
+let DB = require('bookshelf')(knex);
 
 module.exports.DB = DB;

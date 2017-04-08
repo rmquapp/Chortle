@@ -162,7 +162,7 @@
             // If we are assigning the chore
             if (assignee !== "Unassigned"){
                 for (let i = 0; i < $scope.models.childrenLists.length; i++) {
-                    if ($scope.models.childrenLists[i].child_id == assignee) {
+                    if ($scope.models.childrenLists[i].child_id === assignee) {
                          $scope.insertedCallback(
                              assignedChore,
                              $scope.models.childrenLists[i],
@@ -271,7 +271,7 @@
             }
             else {
                 for(let i=0; i < $scope.models.childrenLists.length; i++){
-                    if($scope.models.childrenLists[i].child_id == $scope.models.selected["assigned_child_id"]){
+                    if($scope.models.childrenLists[i].child_id === $scope.models.selected["assigned_child_id"]){
                         list = $scope.models.childrenLists[i];
                         break;
                     }

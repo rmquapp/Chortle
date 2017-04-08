@@ -2,26 +2,26 @@
  * Created by Diaz on 2017-03-21.
  */
 
-var DB = require('./db').DB,
+let DB = require('./db').DB,
     knex = DB.knex;
 
 // Models of objects we are using from the db
-var Parent = DB.Model.extend({
+let Parent = DB.Model.extend({
     tableName: 'parent',
     idAttribute: 'id',
 });
 
-var AssignedChore = DB.Model.extend({
+let AssignedChore = DB.Model.extend({
     tableName: 'assigned_chore',
     idAttribute: 'id',
 });
 
-var ChoreTemplate = DB.Model.extend({
+let ChoreTemplate = DB.Model.extend({
     tableName: 'chore_template',
     idAttribute: 'id'
 });
 
-var Child = DB.Model.extend({
+let Child = DB.Model.extend({
     tableName: 'child',
     idAttribute: 'id'
 });
@@ -52,7 +52,7 @@ function createNewParent(callback) {
 
 function grabParentCredentials(userId, callback) {
     // Skeleton JSON
-    var loginParent = {
+    let loginParent = {
         local: {
             username: null,
             password: null,
@@ -150,7 +150,7 @@ function grabChildrenFromParent(parentId, callback) {
 
 // Given a child Id, obtain all the chores assigned to it
 function getAssignedChoreChild(childId, callback) {
-    var assignedChores = [];
+    let assignedChores = [];
 
     knex.select('assigned_chore.id', 'assigned_chore.name', 'assigned_chore.description', 'assigned_chore.value', 'assigned_chore.status')
         .from('assigned_chore')
@@ -186,8 +186,6 @@ function getAssignedChoresParent(parentId, callback) {
 
 // given a chore id, obtain all the chores from children
 function getAssignedChore(choreId, callback) {
-    var assignedChores = [];
-
     knex.select(
             'assigned_chore.id',
             'assigned_chore.name',
@@ -208,6 +206,7 @@ function getAssignedChore(choreId, callback) {
 }
 
 function deleteAssignedChore(choreId, callback) {
+
     knex('assigned_chore')
         .where('assigned_chore.id', '=', choreId)
         .del()

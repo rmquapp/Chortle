@@ -58,11 +58,11 @@
                         $scope.models.choreList.push(chore);
                     }
                     // ensures the same chore is selected on a re-fetch
-                    if($scope.models.selected != null && $scope.models.selected.id == chore.id){
+                    if($scope.models.selected !== null && $scope.models.selected.id === chore.id){
                         $scope.models.selected = chore;
                     }
                 }
-                if($scope.models.selected == null){
+                if($scope.models.selected === null){
                     if($scope.models.choreList.length > 0) {
                         $scope.models.selected = $scope.models.choreList[0];
                     } else if($scope.models.pendingApprovalList.length > 0){

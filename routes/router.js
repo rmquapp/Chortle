@@ -235,16 +235,16 @@ router.post('/chore-template', function(req, res, next) {
         res.redirect('/signin');
     }
     else {
-        var jsonKeys = ['owner', 'name', 'description', 'value'];
+        let jsonKeys = ['owner', 'name', 'description', 'value'];
 
-        var choreToCreate = req.body;
-        for (var i = 0; i < jsonKeys.length; i++) {
+        let choreToCreate = req.body;
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!choreToCreate.hasOwnProperty(jsonKeys[i])) {
                 return res.json({"error": "Missing parameter in assigned chore"});
             }
 
         }
-        var choreTemplate = new Model.ChoreTemplate({
+        let choreTemplate = new Model.ChoreTemplate({
             owner       : choreToCreate.owner,
             name        : choreToCreate.name,
             description : choreToCreate.description,
@@ -315,14 +315,14 @@ router.post('/chore_template', function (request, response) {
         let parentId = request.user.local.id;
 
         // Ensure name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
         }
 
         // Create new chore_template object
-        var choreTemplate = new Model.ChoreTemplate({
+        let choreTemplate = new Model.ChoreTemplate({
             owner : parentId,
             name  : request.body.name,
             description : request.body.description,
@@ -355,7 +355,7 @@ router.put('/chore_template', function (request, response) {
         let jsonKeys = ['id', 'name', 'description', 'value'];
         let parentId = request.user.local.id;
         // Ensure id, name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
@@ -372,7 +372,7 @@ router.put('/chore_template', function (request, response) {
                 }
                 else {
                     // Create new chore_template object
-                    var choreTemplate = new Model.ChoreTemplate({
+                    let choreTemplate = new Model.ChoreTemplate({
                         id          : request.body.id,
                         owner       : parentId,
                         name        : request.body.name,
@@ -520,7 +520,7 @@ router.post('/assigned_chore', function (request, response) {
         let parentId = request.user.local.id;
 
         // Ensure name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
@@ -534,14 +534,14 @@ router.post('/assigned_chore', function (request, response) {
             else {
                 let childFound = false;
 
-                for ( var i=0; i < children.length; i++) {
+                for ( let i=0; i < children.length; i++) {
                     if(childId === children[i].id) {
                         childFound = true;
                     }
                 }
                 if (childFound) {
                     // Create new assigned_chore object
-                    var assignedChore = new Model.AssignedChore({
+                    let assignedChore = new Model.AssignedChore({
                         owner : request.body.owner,
                         name  : request.body.name,
                         description : request.body.description,
@@ -585,7 +585,7 @@ router.put('/assigned_chore', function (request, response) {
 
         let jsonKeys = ['id', 'owner', 'name', 'description', 'value', 'status'];
         // Ensure id, name, description and value are present in the form received
-        for (var i = 0; i < jsonKeys.length; i++) {
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!request.body.hasOwnProperty(jsonKeys[i])) {
                 return response.send({error: "Missing parameter: " + jsonKeys[i]});
             }
@@ -598,7 +598,7 @@ router.put('/assigned_chore', function (request, response) {
             }
             else {
                 // Create new chore_template object
-                var assignedChore = new Model.AssignedChore({
+                let assignedChore = new Model.AssignedChore({
                     id          : request.body.id,
                     owner       : request.body.owner,
                     name        : request.body.name,
@@ -647,7 +647,7 @@ router.put('/child/assigned_chore', function (request, response) {
             }
             else {
                 // Create new chore_template object
-                var assignedChore = new Model.AssignedChore({
+                let assignedChore = new Model.AssignedChore({
                     id          : request.body.id,
                     owner       : childId,
                     name        : request.body.name,
@@ -933,10 +933,10 @@ router.post('/chores', function(req, res, next) {
         res.redirect('/signin');
     }
     else {
-        var jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
+        let jsonKeys = ['parentId', 'owner', 'name', 'description', 'value', 'status'];
 
-        var choreToCreate = req.body;
-        for (var i = 0; i < jsonKeys.length; i++) {
+        let choreToCreate = req.body;
+        for (let i = 0; i < jsonKeys.length; i++) {
             if (!choreToCreate.hasOwnProperty(jsonKeys[i])) {
                 return res.json({"error": "Missing parameter in assigned chore"});
             }
@@ -948,7 +948,7 @@ router.post('/chores', function(req, res, next) {
                 return res.json({"error": error});
             }
         });
-        // Check parent has child with id == owner
+        // Check parent has child with id === owner
         Model.grabChildrenFromParent(choreToCreate["parentId"], function (error, data) {
             if (error) {
                 return res.json({"error": error});
