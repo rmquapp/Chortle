@@ -893,6 +893,10 @@ router.put('/child/remove_funds', function(request, response) {
             }
         }
 
+        if (request.body.value < 0) {
+            return response.send({error: "Cannot withdraw negative amount"});
+        }
+
         // Obtain child from db, ensure it exists
         Model.getChild(request.body.childId, function (error, oldChild) {
             if (error) {

@@ -153,14 +153,14 @@
             if(!fromTemplate){
                 assignedChore["assigned_child_id"] = item["assigned_child_id"];
                 for (let i = 0; i < $scope.models.childrenLists.length; i++) {
-                    if ($scope.models.childrenLists[i].child_id == item["assigned_child_id"]) {
+                    if ($scope.models.childrenLists[i].child_id === item["assigned_child_id"]) {
                         originatingList = $scope.models.childrenLists[i];
                     }
                 }
             }
 
             // If we are assigning the chore
-            if (assignee != "Unassigned"){
+            if (assignee !== "Unassigned"){
                 for (let i = 0; i < $scope.models.childrenLists.length; i++) {
                     if ($scope.models.childrenLists[i].child_id == assignee) {
                          $scope.insertedCallback(
@@ -171,7 +171,7 @@
                                 // If needed remove from originating child list
                                 if(!fromTemplate && originatingList){
                                     for(let j=0; j<originatingList.length; j++){
-                                        if(originatingList[j]["id"] == item["id"]){
+                                        if(originatingList[j]["id"] === item["id"]){
                                             originatingList.splice(j,1);
                                         }
                                     }
@@ -344,15 +344,20 @@
                 };
 
                 $http.put("/child/remove_funds", data).success(function(response) {
+                    if (response.error) {
+                        $('#warning').text(response.error);
+                        return;
+                    }
+
                     // Update piggybank on screen
                     $scope.models.selectedBank["piggybank"] = response["piggybank"];
                     $scope.models.selectedBank = null;
+                    $('#piggybank-modal').modal('hide');
                 }).error(function(error) {
-                    console.log("Failed to add chore template");
+                    $('#warning').text("Failed to withdraw funds");
                     $scope.models.selectedBank = null;
                 });
             }
-            $('#piggybank-modal').modal('hide');
         }
     });
 
