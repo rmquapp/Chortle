@@ -164,16 +164,21 @@ router.get('/chores', function(request, response) {
                 if (chores) {
                     for ( let i = 0; i < chores.assigned_chores.length; i ++) {
                         let currentChore = chores.assigned_chores[i];
-                        if (choresJson[currentChore["name"]] === undefined) {
-                            choresJson[currentChore["name"]] = [];
+                        if (choresJson[currentChore["child_name"]] === undefined) {
+                            choresJson[currentChore["child_name"]] = {
+                                chores:[],
+                                child_name:currentChore.child_name,
+                                child_id:currentChore.child_id
+                            };
                         }
-                        choresJson[currentChore["name"]].push(
+                        choresJson[currentChore["child_name"]]['chores'].push(
                             {
-                                "id": currentChore["id"],
+                                "id": currentChore["chore_id"],
                                 "name": currentChore["chore_name"],
                                 "description": currentChore["description"],
                                 "value": currentChore["value"],
                                 "status": currentChore["status"],
+                                "assigned_child_id": currentChore["child_id"]
                             });
                     }
                 }
@@ -186,7 +191,7 @@ router.get('/chores', function(request, response) {
                 }
                 else {
                     if(choresTemplate) {
-                        for (var i = 0; i < choresTemplate.chore_template.length; i++) {
+                        for (let i = 0; i < choresTemplate.chore_template.length; i++) {
                             templatesJson.push(
                                 {
                                     id          : choresTemplate.chore_template[i].id,
@@ -204,13 +209,16 @@ router.get('/chores', function(request, response) {
                     else {
                         for (let i = 0; i < children.length; i++) {
                             if (!choresJson.hasOwnProperty(children[i].name)) {
-                                choresJson[children[i].name] = [];
+                                choresJson[children[i].name] = {
+                                    chores:[],
+                                    child_name:children[i].name,
+                                    child_id:children[i].id
+                                };
                             }
                         }
                     }
                     // Send to controller
                     response.send({selected: null, lists: choresJson, template: templatesJson});
-
                 });
 
             });

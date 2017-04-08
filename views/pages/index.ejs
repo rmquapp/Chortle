@@ -5,6 +5,7 @@
   <link rel="stylesheet" type="text/css" href="/stylesheets/parent-dashboard-common.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="/stylesheets/parent-dashboard-small.css"/>
   <link rel="stylesheet" type="text/css" media="screen and (min-width: 501px)" href="/stylesheets/parent-dashboard-large.css"/>
+  <script src="/scripts/parentDashboard.js"></script>
   <script src="/scripts/client.js"></script>
 </head>
 
@@ -15,11 +16,10 @@
     <div class="chore-list">
       <li class="add-chore" id="add"><span class="glyphicon glyphicon-plus"></span><i class="fa fa-plus" aria-hidden="true"></i>&nbsp&nbsp&nbspAdd a chore</li>
       <ul dnd-list="models.template" class="unassigned"
-      dnd-effect-allowed="copy">
-        <li ng-repeat="item in models.template"
+      dnd-effect-allowed="copyMove">
+        <li ng-repeat="item in models.choreTemplates"
           dnd-draggable="item"
           dnd-selected="choreClicked(item, $index, 'Unassigned')"
-          dnd-linked="linkedCallback(item)"
           dnd-effect-allowed="link"
           class="unassigned">
           {{item.name}}
@@ -27,17 +27,16 @@
       </ul>
     </div>
       <ul class="kids-lists">
-        <li ng-repeat="(listName, list) in models.lists"
+        <li ng-repeat=" list in models.childrenLists"
                   class="kid-list">
             <div class="kids-chores">
-              <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>{{listName}}</h6>
+              <h6 class="kid-name"><span class="glyphicon glyphicon-piggy-bank"></span>{{list.child_name}}</h6>
               <hr>
-              <ul dnd-list="list">
+              <ul dnd-list="list" dnd-inserted="insertedCallback(item,list)">
                   <li ng-repeat="item in list"
                       dnd-draggable="item"
                       dnd-type="item.status"
-                      dnd-selected="choreClicked(item, $index, listName)"
-                      dnd-dragend="dragEndCallback(item, $index, listName)"
+                      dnd-selected="choreClicked(item)"
                       dnd-moved="movedCallBack(item, list, $index)"
                       dnd-effect-allowed="move"
                       class="background-{{item.status}}">
@@ -45,8 +44,8 @@
                   </li>
               </ul>
             </div>
-            <div class="kid-bank" ng-click="showPiggybankModal(listName)">
-              <h3 class="bank-amount">${{$parent.children[listName]["piggybank"]}}</h3>
+            <div class="kid-bank" ng-click="showPiggybankModal(list)">
+              <h3 class="bank-amount">${{models.childInfo[list.child_id]["piggybank"]}}</h3>
             </div>
         </li>
       </ul>
@@ -168,395 +167,5 @@
     </div>
   </div>
 </div>
-
-
-<script>
-let children = [];
-let childrenNames = [];
-let app = angular.module("parentView", ['dndLists']);
-let parentId = 0;
-let parentName = null;
-let chores = null;
-let selectedBankChildname = null;
-
-app.controller("parentViewCtrl", function($scope, $http) {
-
-
-    $http.get('parent').
-          success(function (response) {
-      parentId = response["pid"];
-      parentName = response["name"];
-  });
-
-  $http.get('chores').
-    success(function(data, status, headers, config) {
-      $scope.models = data;
-      chores = data;
-    }).
-    error(function(data, status, headers, config) {
-      console.log("Error accessing chores endpoint");
-  });
-
-  $http.get('child').
-    success(function(response) {
-      children = response["children"];
-      $scope.children = {};
-      let childInfo;
-      for (let i = 0; i < children.length; i++) {
-          let child = children[i];
-          let name = child["name"];
-          childInfo = {
-              "id": child["id"],
-              "piggybank": child["piggybank"]
-          };
-          childrenNames.push(name);
-          // Add children to scope so that their account balances can be accessed
-          // from the ng-repeat directive
-          $scope.children[name] = childInfo;
-      }
-    }).
-    error(function(error) {
-      console.log("Error accessing chores endpoint");
-  });
-
-  $scope.linkedCallback = function(item) {
-    // Find out who the chore was assigned to using the ID
-    let assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
-    let assigneeId = getChildId(assigneeName);
-
-    // Insert new chore into database
-    let newChore =
-    {
-      "owner": parseInt(assigneeId),
-      "name": item['name'],
-      "description": item['description'],
-      "value": parseInt(item['value']) || 0,
-      "status": "assigned"
-    };
-
-    // Add new chore to database
-    $http.post("assigned_chore", newChore).success(function(chore) {
-      console.log("Successfully assigned chore");
-
-      // Update ID to reflect database
-      let chores = $scope.models.lists[assigneeName];
-      for (let i in chores) {
-        if (chores[i]["id"] === item["id"]) {
-          $scope.models.lists[assigneeName][i]["id"] = chore["id"];
-        }
-      }
-    }).error(function(error) {
-      console.log("Failed to add chore: " + error);
-    });  
-  };
-
-  // Function that updates selected object from model in $scope.models
-  $scope.movedCallBack = function(item, list, index) {
-      list.splice(index, 1);
-      var assigneeName = findAssignee($scope.models.lists, item['id'], childrenNames);
-      var assigneeId = getChildId(assigneeName);
-      $scope.models.selected = [item, assigneeId];
-
-  };
-
-  // Function that takes the selected object and sends a reassigned chore in a PUT request
-  $scope.dragEndCallback = function(item, index, assignee) {
-
-      if ($scope.models.selected[1]) {
-          var newAssignee = $scope.models.selected[1];
-
-          var reassignedChore = {
-              "id": item.id,
-              "owner": newAssignee,
-              "name": item.name,
-              "description": item.description,
-              "value": item.value,
-              "status": item.status,
-          };
-
-          // Update with a puth request to API
-          $http.put("assigned_chore", reassignedChore).success( function(updatedChore) {
-              console.log("Successfully assigned chore to " + newAssignee);
-          });
-      }
-  };
-
-
-  $scope.addChoreTemplate = function() {
-    var newChoreTemplate =
-    {
-      "owner": parentId,
-      "name": $('#add-chore-title').val(),
-      "description": $('#add-chore-description').val(),
-      "value": parseInt($('#add-chore-value').val()) || 0
-    };
-    $('#add-chore-modal').modal('hide');
-
-    // Insert new chore template into database
-    $http.post("chore-template", newChoreTemplate).success(function(chore) {
-        // Add new chore template to list of chore templates
-        $scope.models.template.push(chore);
-    }).error(function(error) {
-        console.log("Failed to add chore template");
-    });
-  };
-
-  $scope.saveChore = function() {
-    var assignee = $scope.models.selected[1] || "Unassigned";
-    var item = $scope.models.selected[0];
-    var newAssignee;
-
-    var editedChore =
-    {
-      "id": item.id,
-      "name": $('#edit-chore-title').val(),
-      "description": $('#edit-chore-description').val(),
-      "value": parseInt($('#edit-chore-value').val()) || 0,
-      "status": item.status
-    }
-
-    var list;
-    if (assignee === "Unassigned") {
-      list = $scope.models.template;
-    }
-    else {
-      list = $scope.models.lists[assignee];
-    }
-
-    for (var i = 0; i < list.length; i++) {
-      if (list[i] === item) {
-        newAssignee = $('#selectChild').val() || "Unassigned";
-
-        var childId =  getChildId(newAssignee);
-        editedChore["owner"] = childId;
-
-        // If the assignee has not been changed, update the chore
-        if (assignee === newAssignee) {
-          list[i] = editedChore;
-        }
-        // If the assignee has changed, move the updated chore
-        else {
-          if (assignee !== "Unassigned") {
-            list.splice(i, 1);
-          }
-          else {
-            editedChore["status"] = "assigned";
-          }
-          $scope.models.lists[newAssignee].push(editedChore);
-        }
-        break;
-      }
-    }
-    $('#edit-chore-modal').modal('hide');
-
-    // Update chore in database
-    if (newAssignee === "Unassigned") {
-      // Update chore template
-      $http.put("chore_template", editedChore).success(function(response) {
-      }).error(function(error) {
-          console.log("Failed to add chore template");
-      });
-    }
-    else {
-      // Update assigned chore
-      $http.put("assigned_chore", editedChore).success(function(response) {
-      }).error(function(error) {
-        console.log("Failed to add chore template");
-      });
-    }
-  }
-
-  $scope.choreClicked = function(item, index, assignee) {
-    $('#edit-chore-modal').modal('show');
-
-    $('#edit-chore-title').val(item['name']);
-    $('#edit-chore-description').val(item['description']);
-    $('#edit-chore-value').val(item['value']);
-
-    if (assignee === "Unassigned") {
-      assignee = "";
-    }
-    $scope.models.selected = [item, assignee];
-
-    // Remove old select options
-    removeOptions(document.getElementById('selectChild'));
-
-    // Populate select input for assigning a chore to a child
-    var children = childrenNames;
-    var index = children.indexOf(assignee);
-    if (index > -1) {
-      children.splice(index, 1);
-    }
-
-    children.unshift(assignee);
-
-    var select = document.getElementById('selectChild');
-    for (var i = 0; i < children.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = children[i];
-        opt.innerHTML = "&nbsp&nbsp" + children[i] + "&nbsp&nbsp&nbsp&nbsp&nbsp";
-        select.appendChild(opt);
-    }
-
-      if (item["status"] === 'completed') {
-          document.getElementById('approve').classList.toggle("show");
-      } else {
-          document.getElementById('approve').classList.remove("show");
-      }
-  }
-
-  $scope.deleteChore = function() {
-    var lists = $scope.models.lists;   
-    var assignee = $scope.models.selected[1] || "Unassigned";
-    var item = $scope.models.selected[0];
-
-    var list;
-    if (assignee === "Unassigned") {
-      list = $scope.models.template;
-    }
-    else {
-      list = $scope.models.lists[assignee];
-    }
-
-    for (var i = 0; i < list.length; i++) {
-      if (list[i] === item) {
-        list.splice(i, 1);
-        break;
-      }
-    }
-    $('#edit-chore-modal').modal('hide');
-
-    // Delete from database
-    if (assignee === "Unassigned") {
-      // Delete chore template from database
-      $http.delete("/chore_template/:" + item.id, item).success(function(response) {
-      }).error(function(error) {
-          console.log("Failed to add chore template");
-      });
-    }
-    else {
-      // Delete assigned chore from database
-      $http.delete("/assigned_chore/:" + item.id, item).success(function(response) {
-      }).error(function(error) {
-          console.log("Failed to add assigned chore");
-      });      
-    }
-  }
-
-  $scope.approveChore = function () {
-     let assignee = $scope.models.selected[1];
-     let item = $scope.models.selected[0];
-     let childId = getChildId(assignee);
-
-     $('#edit-chore-modal').modal('hide');
-
-         $http.put("/child/add_funds", {childId: childId, value: parseInt(item.value)})
-         .success(function(data) {
-                 if ( data.success) {
-                         window.location = '/';
-                     }
-             })
-         .error(function (error) {
-                 console.log("Failed to add assigned chore");
-             });
-
-      $scope.deleteChore();
-  }
-
-  $scope.showPiggybankModal = function(listName) {
-    selectedBankChildname = listName;
-
-    $('#piggybank-modal').modal('show');
-    document.getElementById("piggybank-modal-title").innerHTML = listName + "'s Piggybank";
-    var value = $scope.children[listName]["piggybank"];
-    document.getElementById("cashoutValue").value = value;
-    document.getElementById("cashoutValue").max = value;
-  }
-
-  $scope.emptyPiggybank = function() {
-    if (selectedBankChildname !== null) {
-      var childId = getChildId(selectedBankChildname);
-      var value = document.getElementById("cashoutValue").value;
-      var data = {
-        "childId": childId,
-        "value": value
-      };
-
-      $http.put("/child/remove_funds", data).success(function(response) {
-        // Update piggybank on screen
-        var child = $scope.children[selectedBankChildname];
-        child["piggybank"] = response["piggybank"];
-      }).error(function(error) {
-        console.log("Failed to add chore template");
-      });
-    }
-    $('#piggybank-modal').modal('hide');
-  }
-});
-
-$(function(){
-  $("#add").on("click",function() {
-    $('#add-chore-modal').modal('show');
-
-    $('#add-chore-title').val("");
-    $('#add-chore-description').val(null);
-    $('#add-chore-value').val(null);
-
-    $('#add-chore-title').focus();
-    return false;
-  });
-
-  $("#add-child").on("click", function () {
-    $("#addChild").modal('show');
-
-    $('#child-name').val("");
-    $('#child-psw').val("");
-    $('#child-psw-repeat').val("");
-    $('#child-username').val("");
-
-    return false;
-    });
-});
-
-// Doesn't work, help pls
-$('#chore-modal').on('show.bs.modal', function () {
-  window.setTimeout(function ()
-  {
-    $('#add-chore-title').focus();
-  }, 0);
-});
-
-function getChildId(childName) {
-  for (var i = 0; i < children.length; i++) {
-    if (children[i]["name"] === childName) {
-      return children[i]["id"];
-    }
-  }
-}
-
-function findAssignee(lists, id, children) {
-  for (var index in children) {
-    var child = children[index];
-    if (child !== "") {
-        var list = lists[child];
-        for (var i = 0; i < list.length; i++) {
-            var chore = list[i];
-            if (chore['id'] === id) {
-                return child;
-            }
-        }
-    }
-  }
-}
-
-function removeOptions(selectbox)
-{
-    var i;
-    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
-    {
-        selectbox.remove(i);
-    }
-}
-</script>
 </body>
 </html>
