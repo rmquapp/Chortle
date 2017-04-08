@@ -385,14 +385,6 @@
         });
     });
 
-    // Doesn't work, help pls
-    $('#chore-modal').on('show.bs.modal', function () {
-        window.setTimeout(function ()
-        {
-            $('#add-chore-title').focus();
-        }, 0);
-    });
-
     function removeOptions(selectbox)
     {
         let i;
