@@ -60,10 +60,7 @@
         $scope.insertedCallback = function(item,list, closure){
             // Determine if the chore is a template or from another child
             if(item.hasOwnProperty("assigned_child_id")){
-                //Dragged from Self
-                if(item.assigned_child_id === list.child_id){
-                    return;
-                }
+
                 // Dragged from another child
                 let reassignedChore = {
                     "id": item.id,
@@ -162,17 +159,30 @@
             // If we are assigning the chore
             if (assignee !== "Unassigned"){
                 for (let i = 0; i < $scope.models.childrenLists.length; i++) {
-                    if ($scope.models.childrenLists[i].child_id === assignee) {
+                    // Only Single Equals Works here
+                    if ($scope.models.childrenLists[i].child_id == assignee) {
                          $scope.insertedCallback(
                              assignedChore,
                              $scope.models.childrenLists[i],
                             function(item){
-                                $scope.models.childrenLists[i].push(item);
                                 // If needed remove from originating child list
                                 if(!fromTemplate && originatingList){
                                     for(let j=0; j<originatingList.length; j++){
-                                        if(originatingList[j]["id"] === item["id"]){
-                                            originatingList.splice(j,1);
+                                        if(originatingList[j]["id"] === item["id"] ){
+                                            // Only Single Equals Works here
+                                            if (originatingList.child_id !=assignee) {
+                                                // If the assignee changed we have to remove from the original list
+                                                // and add to new list
+                                                originatingList.splice(j, 1);
+                                                $scope.models.childrenLists[i].push(item);
+                                            }
+                                            else {
+                                                // If the assignee hasn't change we don't update within the original list
+                                                originatingList[j]["name"] = item["name"];
+                                                originatingList[j]["description"] = item["description"];
+                                                originatingList[j]["value"] = item["value"];
+                                                originatingList[j]["status"] = item["status"];
+                                            }
                                         }
                                     }
                                 }
