@@ -906,7 +906,7 @@ router.put('/child/remove_funds', function(request, response) {
                 let newValue = parseInt(oldChild.piggybank) - request.body.value;
 
                 if (newValue < 0) {
-                    return response.send({error: 'insufficient funds'});
+                    return response.send({error: 'Insufficient funds'});
                 }
 
                 let newChild = new Model.Child({

@@ -328,6 +328,10 @@
             $scope.models.selectedBank = $scope.models.childInfo[list.child_id];
 
             $('#piggybank-modal').modal('show');
+
+            //Hide warning by default
+            $('#warning').text("");
+            
             document.getElementById("piggybank-modal-title").innerHTML = $scope.models.selectedBank["name"] + "'s Piggybank";
             let value = $scope.models.childInfo[list.child_id]["piggybank"];
             document.getElementById("cashoutValue").value = value;
@@ -354,7 +358,7 @@
                     $scope.models.selectedBank = null;
                     $('#piggybank-modal').modal('hide');
                 }).error(function(error) {
-                    $('#warning').text("Failed to withdraw funds");
+                    $('#warning').text("Insufficient funds");
                     $scope.models.selectedBank = null;
                 });
             }
