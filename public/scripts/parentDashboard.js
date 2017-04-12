@@ -341,8 +341,14 @@
 
             //Hide warning by default
             $('#warning').text("");
-            
-            document.getElementById("piggybank-modal-title").innerHTML = $scope.models.selectedBank["name"] + "'s Piggybank";
+
+            let name = $scope.models.selectedBank["name"];
+            let title = name + "'";
+            if(name[name.length-1] !== 's' && name[name.length-1] !== 'S' ){
+                title += "s";
+            }
+            title += " Piggy Bank";
+            document.getElementById("piggybank-modal-title").innerHTML = title;
             let value = $scope.models.childInfo[list.child_id]["piggybank"];
             document.getElementById("cashoutValue").value = value;
             document.getElementById("cashoutValue").max = value;
