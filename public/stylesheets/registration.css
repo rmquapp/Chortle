@@ -79,3 +79,13 @@ img.center {
 .chortle-navbar-right{
   visibility: collapse;
 }
+
+#firstname,
+#lastname,
+#username,
+#email,
+#password1,
+#password2{
+  padding-top: 0;
+  padding-bottom: 0;
+}
