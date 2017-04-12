@@ -164,14 +164,14 @@ router.get('/chores', function(request, response) {
                 if (chores) {
                     for ( let i = 0; i < chores.assigned_chores.length; i ++) {
                         let currentChore = chores.assigned_chores[i];
-                        if (choresJson[currentChore["child_name"]] === undefined) {
-                            choresJson[currentChore["child_name"]] = {
+                        if (choresJson[currentChore["child_id"]] === undefined) {
+                            choresJson[currentChore["child_id"]] = {
                                 chores:[],
                                 child_name:currentChore.child_name,
                                 child_id:currentChore.child_id
                             };
                         }
-                        choresJson[currentChore["child_name"]]['chores'].push(
+                        choresJson[currentChore["child_id"]]['chores'].push(
                             {
                                 "id": currentChore["chore_id"],
                                 "name": currentChore["chore_name"],
@@ -208,7 +208,7 @@ router.get('/chores', function(request, response) {
                     }
                     else {
                         for (let i = 0; i < children.length; i++) {
-                            if (!choresJson.hasOwnProperty(children[i].name)) {
+                            if (!choresJson.hasOwnProperty(children[i].id)) {
                                 choresJson[children[i].name] = {
                                     chores:[],
                                     child_name:children[i].name,

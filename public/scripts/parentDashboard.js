@@ -27,7 +27,16 @@
                 childList.child_name = data['lists'][child]['child_name'];
                 $scope.models.childrenLists.push(childList);
             }
-            $scope.models.childrenLists.sort(function(a, b){return a.child_name.localeCompare(b.child_name)});
+            $scope.models.childrenLists.sort(
+                function(a, b){
+                    let result = a.child_name.localeCompare(b.child_name);
+                    // Sort by name, if names are the same, sort by ID
+                    if (result !== 0) {
+                        return result;
+                    } else {
+                        return a.assigned_child_id - b.assigned_child_id;
+                    }
+                });
             // Loop through the chore templates and populate the templates for the model
             for (let template in data['template']){
                 $scope.models.choreTemplates.push(data['template'][template]);
@@ -252,7 +261,13 @@
                 children.push(child);
             }
             children.sort(function(a, b){
-                return a['name'].localeCompare(b['name']);
+                let result =  a['name'].localeCompare(b['name']);
+                // Sort by name, if name is the same sort by id
+                if(result !== 0) {
+                    return result;
+                } else {
+                    return a['id'] - b['id'];
+                }
             });
 
             let select = document.getElementById('selectChild');
