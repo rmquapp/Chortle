@@ -209,7 +209,7 @@ router.get('/chores', function(request, response) {
                     else {
                         for (let i = 0; i < children.length; i++) {
                             if (!choresJson.hasOwnProperty(children[i].id)) {
-                                choresJson[children[i].name] = {
+                                choresJson[children[i].id] = {
                                     chores:[],
                                     child_name:children[i].name,
                                     child_id:children[i].id
