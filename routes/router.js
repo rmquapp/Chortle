@@ -777,9 +777,22 @@ router.post('/child', function(request, response) {
         let child = request.body;
         let parentId = request.user.local.id;
 
+        // Make sure name and UserNames aren't blanks
+        if(!child.username.trim().length
+            || !child.username.trim().length === 0){
+            // Empty UserNames are not allowed
+            response.send({ success: false, error: 'Username cannot be empty' });
+            return;
+        }
+        if(!child.name.trim().length ||
+            child.name.trim().length === 0){
+            response.send({ success: false, error: 'Child Name cannot be empty' });
+            return;
+        }
+
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.send({ success: false, error: 'password mismatch' });
+            response.send({ success: false, error: 'Password Mismatch' });
             return;
         }
 
@@ -788,7 +801,7 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.send({ success: false, error: 'username already exists' });
+                response.send({ success: false, error: 'Username Already Exists' });
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
