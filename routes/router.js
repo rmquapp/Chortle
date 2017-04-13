@@ -81,15 +81,32 @@ router.post('/signup', function(req, res, next) {
     // Here, req.body is { username, email, password, pwdRepeat }
     let parent = req.body;
 
+    // Make sure UserName is not empty.
+    if(!validateField(parent.username)){
+        res.send({ success: false, error: 'Invalid username' });
+        return;
+    }
+
+    // Make sure the FirstName is not empty
+    if(!validateField(parent.first)){
+        res.send({ success: false, error: 'Invalid first name' });
+        return;
+    }
+    // Make sure the LastName is not empty
+    if(!validateField(parent.last)){
+        res.send({ success: false, error: 'Invalid last name' });
+        return;
+    }
+
     // Make sure valid email address entered
     if (!validateEmail(parent.email)) {
-        res.send({ success: false, error: 'invalid email address' });
+        res.send({ success: false, error: 'Invalid email address' });
         return;
     }
 
     // Make sure password typed correctly
     if (parent.password !== parent.pwdRepeat) {
-        res.send({ success: false, error: 'password mismatch' });
+        res.send({ success: false, error: 'Password mismatch' });
         return;
     }
 
@@ -98,17 +115,17 @@ router.post('/signup', function(req, res, next) {
 
     return usernamePromise.then(function(model) {
         if (model) {
-            res.send({ success: false, error: 'username already exists' });
+            res.send({ success: false, error: 'Username Already Exists' });
         } else {
             let password = parent.password;
             let hash = bcrypt.hashSync(password);
 
             // Make a new postgres db row of the account
             let signUpParent = new Model.Parent({
-                username: parent.username,
+                username: parent.username.trim(),
                 password: hash,
                 email: parent.email,
-                name: parent.first + " " + parent.last});
+                name: parent.first.trim() + " " + parent.last.trim()});
 
             signUpParent.save({}, {method: 'insert'}).then(function(model) {
                 // Sign in the newly registered user
@@ -125,6 +142,10 @@ router.post('/signup', function(req, res, next) {
 function validateEmail(email) {
     let re = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/ig;
     return re.test(email);
+}
+
+function validateField(field) {
+    return field.trim() && field.trim().length !== 0;
 }
 
 router.get('/signout', function(req, res, next) {
@@ -778,21 +799,19 @@ router.post('/child', function(request, response) {
         let parentId = request.user.local.id;
 
         // Make sure name and UserNames aren't blanks
-        if(!child.username.trim().length
-            || !child.username.trim().length === 0){
+        if(!validateField(child.username)){
             // Empty UserNames are not allowed
             response.send({ success: false, error: 'Username cannot be empty' });
             return;
         }
-        if(!child.name.trim().length ||
-            child.name.trim().length === 0){
-            response.send({ success: false, error: 'Child Name cannot be empty' });
+        if(!validateField(child.name)){
+            response.send({ success: false, error: 'Child name cannot be empty' });
             return;
         }
 
         // Make sure password typed correctly
         if (child.pwd !== child.pwdRepeat) {
-            response.send({ success: false, error: 'Password Mismatch' });
+            response.send({ success: false, error: 'Password mismatch' });
             return;
         }
 
@@ -801,15 +820,15 @@ router.post('/child', function(request, response) {
 
         return usernamePromise.then(function(model) {
             if (model) {
-                response.send({ success: false, error: 'Username Already Exists' });
+                response.send({ success: false, error: 'Username already exists' });
             } else {
                 let password = child.pwd;
                 let hash = bcrypt.hashSync(password);
 
                 // Make a new postgres db row of the account
                 let newChild = new Model.Child({
-                    name: child.name,
-                    username: child.username,
+                    name: child.name.trim(),
+                    username: child.username.trim(),
                     p_id: parentId,
                     password: hash
                 });
